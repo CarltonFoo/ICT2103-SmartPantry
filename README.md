@@ -14,29 +14,24 @@ Group Members:
 1. Download and install XAMPP [here](https://www.apachefriends.org/download.html)
 2. Run Apache and MySQL
 3. Clone the repo to anywhere you want
+4. To install the frontend and backend dependencies, cd into the folder and run:
 
-<!-- 4. cd into backend to run a virtual environment:
+    ```
+    npm install
+    ```
+5. Ignore the warnings when installing
+6. To run the project, run:
+    ```
+    npm run dev
+    ```
 
-    ```
-    py -3.9 -m venv venv
-    venv\Scripts\activate
-    ```
-    and install packages by running:
-    ```
-    pip install -r requirements.txt
-    pip install mysqlclient-1.4.6-cp39-cp39-win_amd64.whl
-    ```
-5. To run the backend, run: ```python routes.py```
-6. Open up another cmd and cd into frontend
-7. Run ```npx create-react-app react-app``` to initiase a react application.
-8. Transfer the node_modules folder into the /frontend folder
-9. To run the backend, run:
-    ```npm start``` -->
-
-10. The application should be live on http://localhost:3000
-11. Refer to [this webpage](https://dev.to/dev_elie/connecting-a-react-frontend-to-a-flask-backend-h1o) and [this repo](https://github.com/Dev-Elie/Connecting-React-Frontend-to-a-Flask-Backend) for the structure of this repo.
+7. The application should be live on http://localhost:3000
+8. Refer to [this webpage](https://dev.to/dev_elie/connecting-a-react-frontend-to-a-flask-backend-h1o) and [this repo](https://github.com/Dev-Elie/Connecting-React-Frontend-to-a-Flask-Backend) for the structure of this repo.
 
 <br />
+
+# Notes
+For now, I've set the db to read from backend/database.db . This can be changed to other database sources by editing the ```app.config["SQLALCHEMY_DATABASE_URI"]``` line in backend/app.py . Documentation for this can be found [here](https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/).
 
 # Splitting Work
 - Create your own branch to work on your parts, please don't work on main branch.
