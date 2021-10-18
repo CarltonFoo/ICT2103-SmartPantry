@@ -11,22 +11,22 @@ Group Members:
 
 # Getting Started
 
-1. Download and install XAMPP [here](https://www.apachefriends.org/download.html)
-2. Run Apache and MySQL
-3. Clone the repo to anywhere you want
-4. To install the frontend and backend dependencies, cd into the folder and run:
+<!-- 1. Download and install XAMPP [here](https://www.apachefriends.org/download.html)
+2. Run Apache and MySQL -->
+1. Clone the repo to anywhere you want
+2. To install the frontend and backend dependencies, cd into the folder and run:
 
     ```
     npm install
     ```
-5. Ignore the warnings when installing
-6. To run the project, run:
+3. Ignore the warnings when installing
+4. To run the project, run:
     ```
     npm run dev
     ```
 
-7. The application should be live on http://localhost:3000
-8. Refer to [this webpage](https://dev.to/dev_elie/connecting-a-react-frontend-to-a-flask-backend-h1o) and [this repo](https://github.com/Dev-Elie/Connecting-React-Frontend-to-a-Flask-Backend) for the structure of this repo.
+5. The application should be live on http://localhost:3000
+6. Refer to [this webpage](https://dev.to/dev_elie/connecting-a-react-frontend-to-a-flask-backend-h1o) and [this repo](https://github.com/Dev-Elie/Connecting-React-Frontend-to-a-Flask-Backend) for the structure of this repo.
 
 <br />
 
