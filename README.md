@@ -33,5 +33,7 @@ Group Members:
 # Notes
 For now, I've set the db to read from backend/database.db . This can be changed to other database sources by editing the ```app.config["SQLALCHEMY_DATABASE_URI"]``` line in backend/app.py . Documentation for this can be found [here](https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/).
 
+<br />
+
 # Splitting Work
 - Create your own branch to work on your parts, please don't work on main branch.
