@@ -1,4 +1,4 @@
-# ICT2103-SmartTrip
+# ICT2103-SmartPantry
 ## Tutorial 1 Group 28
 Group Members:
 1. Jimeno Johanna Charissa Mortel
