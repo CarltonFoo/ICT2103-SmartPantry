@@ -14,7 +14,7 @@ Mako==1.1.4
 MarkupSafe==2.0.1
 marshmallow==3.13.0
 marshmallow-sqlalchemy==0.26.1
-mysqlclient @ file:///C:/Users/benne/OneDrive/Documents/GitHub/ICT2103-SmartTrip/backend/mysqlclient-1.4.6-cp39-cp39-win_amd64.whl
+# mysqlclient @ file:///C:\Users\Carlton\Desktop\ICT2103-SmartPantry\backend\mysqlclient-1.4.6-cp39-cp39-win_amd64.whl
 numpy==1.21.3
 pandas==1.3.4
 python-dateutil==2.8.2
