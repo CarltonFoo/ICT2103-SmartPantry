@@ -1,37 +1,56 @@
-import { useState,useEffect } from 'react'
 import './App.css';
-import ArticleList from './Components/ArticleList'
+import "antd/dist/antd.css";
+import "./assets/css/font.css";
+import { useState,useEffect } from 'react'
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+
+import Navbar from './components/Navbar/Navbar';
+import Home from './components/Home/Home';
+import Groceries from './components/Groceries/Groceries';
+import Recipes from './components/Recipes/Recipes';
+import Inventory from './components/Inventory/Inventory';
+
 
 function App() {
-  const [articles, setArticles] = useState([]);
-
-  // Modify the current state by setting the new data to
-  // the response from the backend
-  useEffect(()=>{
-    fetch('http://localhost:5000/articles',{
-      'methods':'GET',
-      headers : {
-        'Content-Type':'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(response => setArticles(response))
-    .catch(error => console.log(error))
-
-  },[])
-
   return (
-    <div className="App container m-4">
-    <div className="row">
-      <div className="text-center">
-      <h1>Connecting a React Frontend to a Flask Backend.</h1>
-      </div>
-    </div>
+    <div>
+      <Router>
+        <Navbar>
+          <Switch>
 
-      <ArticleList 
-      articles={articles} 
-      />
+            <Route 
+              key="home" 
+              path="/" 
+              exact 
+              component={Home}
+            ></Route>
+            <Route 
+              key="groceries" 
+              path="/groceries" 
+              exact 
+              component={Groceries}
+            ></Route>
+            <Route 
+              key="recipes" 
+              path="/recipes" 
+              exact 
+              component={Recipes}
+            ></Route>
+            <Route 
+              key="inventory" 
+              path="/inventory" 
+              exact 
+              component={Inventory}
+            ></Route>
 
+
+          </Switch>
+        </Navbar>
+      </Router>
     </div>
   );
 }

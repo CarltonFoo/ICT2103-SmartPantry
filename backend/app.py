@@ -1,31 +1,41 @@
-# Import the required libraries
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_marshmallow import Marshmallow
+from flask import Flask,jsonify,request
+from flask_mysqldb import MySQL
 from flask_cors import CORS
+import sys
 
+# Create an application instance
+app = Flask(__name__)
+CORS(app)
 
-# Create various application instances
-# Order matters: Initialize SQLAlchemy before Marshmallow
-db = SQLAlchemy()
-migrate = Migrate()
-ma = Marshmallow()
-cors = CORS()
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'password'
+app.config['MYSQL_DB'] = 'flask'
 
+mysql = MySQL(app)
 
-def create_app():
-    """Application-factory pattern"""
-    app = Flask(__name__)
-    # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root@localhost/flask"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Define a route to fetch the avaialable articles
+@app.route("/allarticles", methods=["GET"], strict_slashes=False)
+def articles():
+	if request.method == "GET":
+		cur = mysql.connection.cursor()
+		cur.execute("SELECT * FROM flask.articles")
+		columns = cur.description 
+		result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
+		mysql.connection.commit()
+		cur.close()
+		return jsonify(result)
 
-    # Initialize extensions
-    # To use the application instances above, instantiate with an application:
-    db.init_app(app)
-    migrate.init_app(app, db)
-    ma.init_app(app)
-    cors.init_app(app)
+# def articles():
+# 	if request.method == "POST":
+# 		details = request.form
+# 		firstName = details['fname']
+# 		lastName = details['lname']
+# 		cur = mysql.connection.cursor()
+# 		result = cur.execute("INSERT INTO MyUsers(firstName, lastName) VALUES (%s, %s)", (firstName, lastName))
+# 		mysql.connection.commit()
+# 		cur.close()
+# 		return jsonify(result)
 
-    return app
+if __name__ == "__main__":
+	app.run(debug=True)
