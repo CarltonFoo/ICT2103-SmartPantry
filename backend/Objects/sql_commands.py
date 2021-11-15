@@ -93,29 +93,35 @@ def reset_index(table_name):
     mydb.commit()
 
 
-def insert_data(table_name, val1, val2):
+def insert_data(table_name, columns, values):
     mycursor = mydb.cursor()
-    mycursor.execute("INSERT INTO test VALUES ('', %s, %s)", (val1, val2))
+    sql = "INSERT INTO " + table_name + \
+        " (" + columns + ") VALUES (" + values + ")"
 
+    mycursor.execute(sql)
     mydb.commit()
 
     print("data inserted to {} table successfully.".format(table_name))
+
 
 # Test Data
 print(select_all_columns("test"))
 print("\n")
 print(select_certain_columns("test", "id, name"))
 print("\n")
-update_data("test", "id", "1", "name", "Johanna")
+update_data("test", "id", "1", "name", "Bianca")
 print("\n")
 print(select_all_columns("test"))
 
-# Iterate through dictionary to insert into table
-# people = {"Andrea": "person1", "Miguel": "person2", "Grace": "person3"}
-# for key, value in people.items():
-#     insert_data("test", key, value)
+# Insert
+columns = ["name", "desc"]
+columns_string = ', '.join(f"`{w}`" for w in columns)
 
-# Delete commands
+values = ["Grace", "person4"]
+values_string = ', '.join(f"'{w}'" for w in values)
+# insert_data("test", columns_string, values_string)
+
+# Delete
 print("\n")
-# delete_data("test", "id", "1")
+# delete_data("test", "id", "4")
 # delete_all("test")
