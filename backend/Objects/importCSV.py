@@ -1,13 +1,12 @@
 import os
 import pandas as pd
-import sqlalchemy
 
 class csv:
     """A CSV object represent the CSV."""
     def __init__(self, file: str) :
         if not file.endswith('.csv'):
             raise Exception("File format is not supported. Only supports CSV.")
-        dir = os.path.join(os.getcwd(), "backend/datasets/", file)
+        dir = os.path.join(os.getcwd(), "../datasets/", file)
         if not os.path.exists(dir):
             raise Exception("File does not exist in datasets folder")
         self.dir = dir
@@ -18,6 +17,8 @@ class csv:
         """This imports CSV and returns a dataframe, expecting columns header"""
         return pd.read_csv(self.dir)
 
-    def  csv_to_sql(self, engine: sqlalchemy.engine.Engine, table: str, ifExists = 'append', chunkSize = 1000):
+    def  csv_to_sql(self, con, table: str, ifExists = 'append', chunkSize = 1000):
         """This function inserts Pandas DataFrames into a Database"""
-        self.data.to_sql(table, con=engine,if_exists=ifExists, chunksize= chunkSize)
+        self.data.to_sql(table, con,if_exists=ifExists, chunksize= chunkSize)
+
+

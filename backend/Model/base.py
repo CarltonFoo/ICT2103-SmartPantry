@@ -5,12 +5,12 @@ class DataParserInterface:
     """Control class that has all operations needed for data parsing"""
     def hasData(self, data: dict, *args, selection:str = "all") -> bool:
         """Validate if data holding all/any keys"""
-        if selection is "all":
+        if selection == "all":
             if all(key in data for key in args):
                 return True
             else:
                 raise KeyError(f'Parameter has missing {args}')
-        elif selection is "any":
+        elif selection == "any":
             if any(key in data for key in args):
                 return True
             else:
