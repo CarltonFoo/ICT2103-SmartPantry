@@ -28,6 +28,8 @@ mydb = mysql.connector.connect(
 #     print("{} database created successfully.".format(db_name))
 
 
+# Retrieves data from all the columns from "table_name"
+# SQL = SELECT * FROM "table_name"
 def select_all_columns(table_name):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM {}".format(table_name))
@@ -38,6 +40,8 @@ def select_all_columns(table_name):
     return myresult
 
 
+# Retrieves data from specified columns "column_names" from "table_name"
+# SQL = SELECT "column_names" FROM "table_name"
 def select_certain_columns(table_name, column_names):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT {} FROM {}".format(column_names, table_name))
@@ -48,6 +52,8 @@ def select_certain_columns(table_name, column_names):
     return myresult
 
 
+# Updates "table_name" by setting the "column_name" = "value" where the "identifier" = "identifier_value"
+# SQL = UPDATE "table_name" SET "column_name" = "value" WHERE "identifier" = "identifier_value"
 def update_data(table_name, identifier, identifier_value, column_name, value):
     mycursor = mydb.cursor()
     mycursor.execute("UPDATE {} SET {} = '{}' WHERE {} = '{}'".format(
@@ -58,6 +64,8 @@ def update_data(table_name, identifier, identifier_value, column_name, value):
     print("{} table updated successfully.".format(table_name))
 
 
+# Deletes the row from "table_name" where the "identifier" = "identifier_value"
+# SQL = DELETE FROM "table_name" WHERE "identifier" = "identifier_value"
 def delete_data(table_name, identifier, identifier_value):
     mycursor = mydb.cursor()
 
@@ -75,6 +83,8 @@ def delete_data(table_name, identifier, identifier_value):
     print("data deleted from {} table successfully.".format(table_name))
 
 
+# Deletes all data in "table_name"
+# SQL = DELETE FROM "table_name"
 def delete_all(table_name):
     mycursor = mydb.cursor()
     mycursor.execute("DELETE FROM {}".format(table_name))
@@ -86,6 +96,7 @@ def delete_all(table_name):
     print("deleted all data from {} table successfully".format(table_name))
 
 
+# Resets auto-increment index of "table_name" *Don't use (mainly for delete_all function)
 def reset_index(table_name):
     mycursor = mydb.cursor()
     mycursor.execute("ALTER TABLE {} AUTO_INCREMENT = 1".format(table_name))
@@ -93,6 +104,13 @@ def reset_index(table_name):
     mydb.commit()
 
 
+# Inserts data values into "table_name"
+# SQL = INSERT INTO "table_name" (columns) VALUES (values)
+# data is a dictionary for e.g.
+# data = {
+#     "name": "William",
+#     "desc": "person3"
+# }
 def insert_data(table_name, data):
     columns = []
     values = []
@@ -100,7 +118,7 @@ def insert_data(table_name, data):
     for key, value in data.items():
         columns.append(key)
         values.append(value)
-    
+
     columns_string = ', '.join(f"`{w}`" for w in columns)
     values_string = ', '.join(f"'{w}'" for w in values)
 
@@ -125,7 +143,7 @@ print(select_all_columns("test"))
 
 
 data = {
-    "name":"William",
+    "name": "William",
     "desc": "person3"
 }
 
