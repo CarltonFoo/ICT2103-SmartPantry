@@ -50,14 +50,14 @@ class User(Base, _Credential, _Demographic):
         return {**self.getID(), **self.getCredential(), ** self.getDemographic() }
 
 
-data1 = {
-    "_id" : "123",
-    "username" : "456",
-    "password" : "789",
-    "age" : "10",
-    "gender" : "male",
-    "height" : float("167"),
-}
+# data1 = {
+#     "_id" : "123",
+#     "username" : "456",
+#     "password" : "789",
+#     "age" : "10",
+#     "gender" : "male",
+#     "height" : float("167"),
+# }
 
-usr = User(data1)
-print(usr.getter())
+# usr = User(data1)
+# print(usr.getter())
