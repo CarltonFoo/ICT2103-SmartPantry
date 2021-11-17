@@ -1,12 +1,13 @@
 import os
 import pandas as pd
+# from sqlalchemy import create_engine
 
 class csv:
     """A CSV object represent the CSV."""
     def __init__(self, file: str) :
         if not file.endswith('.csv'):
-            raise Exception("File format is not supported. Only supports CSV.")
-        dir = os.path.join(os.getcwd(), "../datasets/", file)
+            raise Exception("File format is not supported. Only supports CSV.")        
+        dir = os.path.join(os.path.dirname(__file__), "../datasets/", file)
         if not os.path.exists(dir):
             raise Exception("File does not exist in datasets folder")
         self.dir = dir
@@ -22,3 +23,6 @@ class csv:
         self.data.to_sql(table, con,if_exists=ifExists, chunksize= chunkSize)
 
 
+# engine = create_engine('sqlite://', echo=False)
+# a = csv("AverageFoodPrices.csv")
+# a.csv_to_sql(table="users", con=engine)
