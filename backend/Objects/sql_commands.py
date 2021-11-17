@@ -29,7 +29,7 @@ mydb = mysql.connector.connect(
 
 
 # Retrieves data from all the columns from "table_name"
-# SELECT * FROM "table_name"
+# SQL = SELECT * FROM "table_name"
 def select_all_columns(table_name):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM {}".format(table_name))
