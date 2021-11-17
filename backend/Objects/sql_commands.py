@@ -93,10 +93,20 @@ def reset_index(table_name):
     mydb.commit()
 
 
-def insert_data(table_name, columns, values):
+def insert_data(table_name, data):
+    columns = []
+    values = []
+
+    for key, value in data.items():
+        columns.append(key)
+        values.append(value)
+    
+    columns_string = ', '.join(f"`{w}`" for w in columns)
+    values_string = ', '.join(f"'{w}'" for w in values)
+
     mycursor = mydb.cursor()
     sql = "INSERT INTO " + table_name + \
-        " (" + columns + ") VALUES (" + values + ")"
+        " (" + columns_string + ") VALUES (" + values_string + ")"
 
     mycursor.execute(sql)
     mydb.commit()
@@ -113,15 +123,16 @@ update_data("test", "id", "1", "name", "Bianca")
 print("\n")
 print(select_all_columns("test"))
 
-# Insert
-columns = ["name", "desc"]
-columns_string = ', '.join(f"`{w}`" for w in columns)
 
-values = ["Grace", "person4"]
-values_string = ', '.join(f"'{w}'" for w in values)
-# insert_data("test", columns_string, values_string)
+data = {
+    "name":"William",
+    "desc": "person3"
+}
+
+# Insert
+# insert_data("test", data)
 
 # Delete
 print("\n")
-# delete_data("test", "id", "4")
+# delete_data("test", "id", "5")
 # delete_all("test")
