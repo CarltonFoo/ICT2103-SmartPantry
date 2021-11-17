@@ -1,12 +1,14 @@
 from base import  Base, DataParserInterface
 
 class _Credential(DataParserInterface):
+    """Class contains attribute username and password"""
     def __init__(self, data:dict) -> None:
         if self.hasData(data, "username", "password"):
             self.__username = data['username']
             self.__password = data['password']
 
     def setCredential(self, data:dict) -> None:
+        """Setter method for attributes in class Credential"""
         if self.hasData(data, "username", "password"):
             if data['username'] is not None:
                 self.__username = data['username']
@@ -14,9 +16,11 @@ class _Credential(DataParserInterface):
                 self.__password = data['password']
 
     def getCredential(self) -> dict:
+        """Return all attributes data in type dict"""
         return {"username": self.__username, "password":self.__password}
 
 class _Demographic:
+    """Class contains attribute age, gender and height"""
     def __init__(self, data) -> None:
         if self.hasData(data, "age", "gender", "height"):
             self.__age = data["age"]
@@ -24,14 +28,17 @@ class _Demographic:
             self.__height = data["height"]
 
     def setDemographic(self, data) -> None:
+        """Setter method for attributes in class Demographic"""
         self.__age = data["age"]
         self.__gender = data["gender"]
         self.__height = data["height"]
 
     def getDemographic(self) ->dict:
+        """Return all attributes data in type dict"""
         return {"age": self.__age, "gender": self.__gender, "height": self.__height}
 
 class User(Base, _Credential, _Demographic):
+    """Class inherited classes Base, Credential and Demographic"""
     def __init__(self,data) -> None:
         Base.__init__(self, data)
         _Credential.__init__(self, data)
@@ -39,6 +46,7 @@ class User(Base, _Credential, _Demographic):
         # print(self.__demographic.getDemographic())
 
     def getter(self):
+        """Return all attributes data in type dict"""
         return {**self.getID(), **self.getCredential(), ** self.getDemographic() }
 
 

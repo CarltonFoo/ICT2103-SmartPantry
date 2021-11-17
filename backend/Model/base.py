@@ -2,24 +2,34 @@ from abc import abstractmethod
 import json
 
 class DataParserInterface:
-    def hasData(self, data: dict, *args) -> bool:
-        if all(key in data for key in args):
-            return True
+    """Control class that has all operations needed for data parsing"""
+    def hasData(self, data: dict, *args, selection:str = "all") -> bool:
+        """Validate if data holding all/any keys"""
+        if selection is "all":
+            if all(key in data for key in args):
+                return True
+            else:
+                raise KeyError(f'Parameter has missing {args}')
+        elif selection is "any":
+            if any(key in data for key in args):
+                return True
+            else:
+                raise KeyError(f'Parameter has missing {args}')
         else:
-            raise ValueError(f'Parameter has missing {args}')
+            raise ValueError(f'selection has no {selection}')
+
 
     def  validateJSON(self, jsonData):
         try:
             # Parse JSON from String
             json.loads(jsonData)
-            # Parse JSON from file
-            json.load(jsonData)
         except ValueError as err:
             return False
         return True
 
 
 class Base(DataParserInterface):
+    "Class contains attribute id"
     def __init__(self, data) -> None:
         if self.hasData(data, "_id"):
             self.__id = data["_id"]
@@ -29,5 +39,6 @@ class Base(DataParserInterface):
         
     @abstractmethod
     def getter(self):
+        # Abstract getter method for all its children
         pass
 
