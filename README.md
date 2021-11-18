@@ -30,5 +30,13 @@ Make sure you have at least Python 3.9 and Node 14.18 installed
 
 # Notes
 - Ensure virtual environment (venv) is enabled before staring the project with ```py -3.9 -m venv venv```. If need to, you can disable it with ```deactivate```
+- Ensure .env file is present with correct configurations
 - Run ``` flask run --host=0.0.0.0 --port=5000 ``` to start the project
 - Jiayous guys :')
+
+# .env
+The .env file will have 4 variables:
+1. FLASK_APP=run.py
+2. FLASK_ENV=development
+3. SQL_USERNAME=<mysql username>
+4. SQL_PASSWORD=<mysql password>
