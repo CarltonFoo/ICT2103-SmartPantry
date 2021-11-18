@@ -1,6 +1,6 @@
 import Objects.sql_commands
-from backend.Model.user import User
-from backend.Objects.sql_commands import delete_data, insert_data, select_all_columns
+from Model.user import User
+from Objects.sql_commands import delete_data, insert_data, select_all_columns
 
 
 def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
