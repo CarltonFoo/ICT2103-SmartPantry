@@ -20,7 +20,7 @@ mydb = mysql.connector.connect(
 # Database connection
     host="localhost",
     user="root",
-    password="password"
+    password=""
 )
 filePath = './sql_scripts/full_script.sql'
 setUpDB(mydb,filePath)

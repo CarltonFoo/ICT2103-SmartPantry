@@ -12,6 +12,7 @@ from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
 
+from Objects import sql_commands
 
 @blueprint.route('/')
 def route_default():
@@ -85,7 +86,18 @@ def logout():
     return redirect(url_for('authentication_blueprint.login'))
 
 
+@blueprint.route('/price_checker')
+def price_checker():
+    food_items = sql_commands.select_all_columns("food_item")
+
+    return render_template('home/pricechecker.html', food_items=food_items)
+
+
+@blueprint.route('/grocery_history')
+def grocery_history():
+    return render_template('home/history.html')
 # Errors
+
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
