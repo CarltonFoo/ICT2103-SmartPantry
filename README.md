@@ -38,5 +38,5 @@ Make sure you have at least Python 3.9 and Node 14.18 installed
 The .env file will have 4 variables:
 1. FLASK_APP=run.py
 2. FLASK_ENV=development
-3. SQL_USERNAME=<<mysql username>>
-4. SQL_PASSWORD=<<mysql password>>
+3. SQL_USERNAME=\<mysql username\>
+4. SQL_PASSWORD=\<mysql password\>
