@@ -1,0 +1,124 @@
+[
+ {
+   "Recipe ID": 1,
+   "recipe_name": "Singapore Chicken Wings",
+   "Ingredients": [
+     {
+       "food_name":"Chicken Wings",
+       "measurement(g)":2000
+     },
+     {
+       "food_name":"light soy sauce",
+       "measurement(g)":10
+     },
+     {
+      "food_name":"oyster sauce",
+      "measurement(g)":10
+     },
+     {
+      "food_name":"salt",
+      "measurement(g)":40
+     }
+   ],
+   "Calories": 118,
+   "Dietary Types": "Chinese Food",
+   "Marinates and Side Ingredients": "5 tbsp oyster Sauce\n\n1.5 tbsp dark soya sauce\n\n2 tbsp light soya sauce\n\n1.5 tbsp honey\n\n4 tbsp sesame Oil\n\n3 tbsp salt",
+   "Steps": "1.Add all marinates into chicken wings.\n2.Marinate overnight or at least one hour.\n3.Heat up oven at 150 degree celsius\n4.Grill for 15 minutes and turn chicken wings and grill for 10 minutes till golden brown.\nReady to serve."
+ },
+ {
+   "Recipe ID": 2,
+   "recipe_name": "Granny's Chicken Soup",
+   "Ingredients": [
+    {
+      "food_name":"Small Prawns",
+      "measurement(g)":1000
+    },
+    {
+      "food_name":"Whole Chicken",
+      "measurement(g)":2000
+    }
+    ,{
+      "food_name":"Coconut Milk",
+      "measurement(g)": 50
+    }
+  ],
+  
+   "Calories": 192,
+   "Dietary Types": "Eurasian Food",
+   "Marinates and Side Ingredients": "15 pcs long green chillies, sliced\n� � � cup thick coconut milk (from 200g grated fresh coconut)\n1 tsp sugar\n2 tsp salt or to taste\n� cup oil\nREMPAH/PASTE:\n350g shallots\n5 or 6 pcs green chilli padi\n12 pcs candlenuts\n3cm turmeric\n2cm square piece of belachan/shrimp paste\n6 cloves garlic\n2 stalks lemongrass cut, into 2cm pieces and lightly bashed",
+   "Steps": "\n1.Grind all paste ingredients in a food processor.\n2.Heat a wok, pour in oil and heat until oil is hot.\n3.Add in the paste ingredients and saute over medium heat until the paste is well cooked and fragrant.\n4.Add a little coconut milk if paste is drying out to prevent the paste from burning.\n5.When paste is cooked, add remaining coconut milk.\n6.Saute until the paste is dry and oil separates from the paste.\n7.Add prawns and sliced green chillies.\n8.Turn up the heat and cook until prawns turn pink.\n9.Add sugar and salt to taste.\n10.Turn off heat.\n11.Serve."
+ },
+ {
+   "Recipe ID": 3,
+   "recipe_name": "Fish Masala",
+   "Ingredients": [
+    {
+      "food_name":"Cod Fish",
+      "measurement(g)":1000
+    }
+  ],
+   "Weight(g)": 1000,
+   "Calories": 306,
+   "Dietary Types": "Indian Food",
+   "Marinates and Side Ingredients": "MASALA PASTE BLEND:\n1 grated coconut (500g)\n\n3 tbs black peppercorns\n\n1 � tbs cumin seeds\n\n3 tbs fennel seeds\n\n4 � tbs chilli powder\n\n� tsp turmeric powder\n\n2 cloves garlic\n\n1-inch ginger\n\n2 � tsp salt or to taste\n\n3 cups water",
+   "Steps": "1.Blend the ingredients for Masala Paste in a grinder till smooth.\n2.Marinate the fish with the masala paste, making sure that all the pieces are well coated. Set aside for half an hour.\n3.Heat oil in a flat pan.\n4.Add curry leaves. This is to fragrant the oil.\n5.Take out the fish from the masala paste. Set aside the masala paste.\n6.Fry the fish in the pan for about 5 minutes on each side till golden brown.\n7.Transfer the fish to a serving tray.\n8.Sieve the oil in the pan through a strainer to remove the charred coconut bits.\n9.Add the oil back to the pan, adding more if needed.\n10.Add the masala paste and fry until it changes colour and is fragrant, stirring continuously. This would take around 30 minutes.\n11.Spoon the masala paste over the fried fish.\n12.Serve with rice."
+ },
+ {
+   "Recipe ID": 4,
+   "recipe_name": "Udang Goreng Assam",
+   "Ingredients": [
+    {
+      "food_name":"Medium Prawns",
+      "measurement(g)":1000
+    }
+   ],
+   "Calories": 197,
+   "Weight": 500,
+   "Dietary Types": "Malay Food",
+   "Marinates and Side Ingredients": "MARINADE\n1 tbsp assam paste\n\n1 tbsp thick dark soya sauce\n\n2 tbsp sugar",
+   "Steps": "1.Mix the marinade and add the prawns. Set aside for 15-30 mins.\n2.Heat the oil and fry the prawns till dry and fragrant."
+ },
+ {
+   "Recipe ID": 5,
+   "recipe_name": "Steamed Pork In Prawn Paste",
+   "Ingredients": [
+    {
+      "food_name":"Streaky Pork",
+      "measurement(g)": 200
+    }
+   ],
+   "Calories": 227,
+   "Dietary Types": "Chinese Food",
+   "Marinates and Side Ingredients": "2 tsp prawn paste\n\n1 tsp sugar\n\n� tsp corn starch\n\n1 slice tangerine peel\n\n1 pc red chilli, sliced (for garnish)\n\nSpring onions, sliced (for garnish)\n\nA pinch of pepper\n\nCooking oil",
+   "Steps": "\n1.Wash tangerine peel and soak in a bowl of hot water.\n2.Marinade the pork belly with pepper, sugar, corn starch and prawn paste. Mix well.\n3.Cut the tangerine peel into small thin strips. Add to the marinated pork and mix well.\n4.Add a dash of water to the mixture. If more sauce is desired, add more water.\n5.Steam in a wok of boiling water for 9 minutes.\n6.Garnish with chilli and spring onions.\n7.Serve hot with steamed rice."
+ },
+ {
+   "Recipe ID": 6,
+   "recipe_name": "Fried Chicken Wings with Kicap Manis",
+   "Ingredients": [
+    {
+      "food_name":"Chicken Wing",
+      "measurement(g)": 4000
+    }
+   ],
+   "Calories": 400,
+   "Dietary Types": "Malay Food",
+   "Marinates and Side Ingredients": "Tamarind pulp � � cup\nFish sauce � 1 tea spoon\nSPICE BLEND:\nCumin powder � 1 tea spoon\nTumeric powder � 1 tea spoon\nChilli powder -1 tea spoon\nSalt � 1 tea spoon\nFish curry powder � 1 tea spoon\nOil for frying\nKECAP MANIS DIP\nKecap manis � � cup\nChopped chili padi � 1 whole\nSliced shallots � 3 whole\nCalamansi juice � 3-4 whole\nChopped coriander leaves",
+   "Steps": "Chicken Wings\n1.Wash and clean- wipe dry the chicken wings.\n2.In a large mixing bowl add in the spice blend.\n3.Add in the chicken wings and gently give it a good rub.\n4.Add in tamarid pulp � mixed well and marinate for 2-3 hours .\n5.In a large pot heat up oil enough for deep frying.\n6.Deep fry the chicken until cooked to golden brown.\n7.Ready to serve.\nKecap manis dip\n1.Add in all the ingredients into a bowl and mix well.\n2.Ready to be serve with chicken wings"
+ },
+ {
+   "Recipe ID": 7,
+   "recipe_name": "Granny's Chicken Soup", 
+   "Ingredients": [
+    {
+      "food_name":"Whole Chicken",
+      "measurement(g)": 2000
+    }
+   ],
+   "Weight": 3000,
+   "Calories": 204,
+   "Dietary Types": "Chinese Food",
+   "Marinates and Side Ingredients": "1 large thumb young ginger, thinly sliced\n\n3 stalks spring onions, sliced about an inch long\n\n1 tsp top-grade sesame oil\n\n1 tsp canola oil\n\n6 cloves garlic, lightly bashed with skin removed\n\n1/2 tsp coriander seeds, bashed in mortar and pestle\n\n1 tsp white peppercorns, bashed in mortar and pestle\n\n2 large dried scallops, pre-soaked in cold water for 10-15 minutes\n\n2 litres water\n\n2 tins mushrooms, drained\n\n3 large strips fish maw (Prepare with hot, not boiling water. Soak in the hot water for 30 minutes and rinse under cold water before cutting into strips)\n\nA pinch of salt, to taste\n\nCoriander leaves, for garnish",
+   "Steps": "\n1.Add canola and sesame oil into a large soup pot in high heat. Turn down to medium heat when smoking.\n2.Add ginger, garlic, coriander seeds and peppercorns. Fry until fragrant.\n3.Add cut chicken and fry for 7 to 10 minutes. Coat all the chicken pieces with the fragrant oil and spices.\n4.Add water and turn up the heat to high.\n5.Bring to boil, then turn heat down to medium low.\n6.Add dried scallops and mushrooms. Add a pinch of salt.\n7.Cover the pot for one hour.\n8.Add the fish maw at the end of the hour after bringing the heat down to a simmer.\n9.Garnish with coriander leaves.\n10.Serve with plain rice when ready, alongside the usual condiments of garlic chilli and quality dark soy sauce with heaps of minced ginger."
+ }
+]
