@@ -1,8 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
 from flask_wtf import FlaskForm
 from wtforms import TextField, PasswordField, SelectField, DecimalField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired
