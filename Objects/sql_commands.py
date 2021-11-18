@@ -1,11 +1,12 @@
 import mysql.connector
+import os
 
 # Database connection
 mydb = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="",
-    database="ict2103project_database"
+    user=os.environ['SQL_USERNAME'],
+    password=os.environ['SQL_PASSWORD'],
+    database="smartpantry"
 )
 
 # Things to do: create functions for the following SQL statements
@@ -133,24 +134,24 @@ def insert_data(table_name, data):
 
 
 # Test Data
-print(select_all_columns("test"))
-print("\n")
-print(select_certain_columns("test", "id, name"))
-print("\n")
-update_data("test", "id", "1", "name", "Bianca")
-print("\n")
-print(select_all_columns("test"))
+# print(select_all_columns("test"))
+# print("\n")
+# print(select_certain_columns("test", "id, name"))
+# print("\n")
+# update_data("test", "id", "1", "name", "Bianca")
+# print("\n")
+# print(select_all_columns("test"))
 
 
-data = {
-    "name": "William",
-    "desc": "person3"
-}
+# data = {
+#     "name": "William",
+#     "desc": "person3"
+# }
 
 # Insert
 # insert_data("test", data)
 
 # Delete
-print("\n")
+# print("\n")
 # delete_data("test", "id", "5")
 # delete_all("test")
