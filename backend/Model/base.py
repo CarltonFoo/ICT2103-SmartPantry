@@ -19,13 +19,12 @@ class DataParserInterface:
             raise ValueError(f'selection has no {selection}')
 
 
-    def  validateJSON(self, jsonData):
+    def  getJSON(self, jsonData):
         try:
             # Parse JSON from String
-            json.loads(jsonData)
+            return json.loads(jsonData)
         except ValueError as err:
             return False
-        return True
 
 
 class Base(DataParserInterface):
