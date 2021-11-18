@@ -32,8 +32,3 @@ Make sure you have at least Python 3.9 and Node 14.18 installed
 - Ensure virtual environment (venv) is enabled before staring the project with ```py -3.9 -m venv venv```. If need to, you can disable it with ```deactivate```
 - Run ``` flask run --host=0.0.0.0 --port=5000 ``` to start the project
 - Jiayous guys :')
-
-<br />
-
-# Splitting Work
-- Create your own branch to work on your parts, please don't work on main branch.
