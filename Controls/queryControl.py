@@ -1,6 +1,6 @@
 import Objects.sql_commands
-from backend.Model.user import User
-from backend.Objects.sql_commands import delete_data, insert_data, select_all_columns
+from Model.user import User
+from Objects.sql_commands import delete_data, insert_data, select_all_columns
 
 
 def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
@@ -14,7 +14,8 @@ def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
         sql_result = select_all_columns(table_name=table_name)
         #noSQL
         nosql_result = None
-        return sql_result, nosql_result
+        
+        return sql_result
 
     # Instantiate object
     if table_name == "USERS":
