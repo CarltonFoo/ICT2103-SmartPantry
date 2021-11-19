@@ -4,8 +4,10 @@ import os
 # Database connection
 mydb = mysql.connector.connect(
     host="localhost",
-    user=os.environ['SQL_USERNAME'],
-    password=os.environ['SQL_PASSWORD'],
+    # user=os.environ['SQL_USERNAME'],
+    # password=os.environ['SQL_PASSWORD'],
+    user = "root",
+    password = "",
     database="smartpantry"
 )
 
