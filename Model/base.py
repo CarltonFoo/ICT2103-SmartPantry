@@ -35,9 +35,25 @@ class Base(DataParserInterface):
 
     def getID(self):
         return {"_id": self.__id}
-        
+
+    def setID(self, data)->None:
+        if self.hasData(data, "_id"):
+            self.__id = data["_id"]
+            
     @abstractmethod
     def getter(self):
         # Abstract getter method for all its children
         pass
 
+class Item(DataParserInterface):
+    """Class contains attribute name"""
+    def __init__(self, data) -> None:
+        if self.hasData(data, "name"):
+            self.__name = data["name"]
+
+    def getName(self):
+        return {"name": self.__name}
+
+    def setName(self,data):
+        if self.hasData(data, "name"):
+            self.__id = data["name"]
