@@ -18,40 +18,24 @@ mydb = mysql.connector.connect(
 # INSERT /
 
 
-# def create_database(db_name):
-#     mydb = mysql.connector.connect(
-#         host="localhost",
-#         user="root",
-#         password=""
-#     )
-
-#     mycursor = mydb.cursor()
-#     mycursor.execute("CREATE DATABASE %s" % db_name)
-
-#     print("{} database created successfully.".format(db_name))
-
-
-# Retrieves data from all the columns from "table_name"
-# SQL = SELECT * FROM "table_name"
-def select_all_columns(table_name):
+# ["*"] Retrieves data from "table_name" or ["column_names"] Retrieves data from specified columns "column_names" from "table_name"
+# SQL = SELECT * FROM "table_name" or SELECT "column_names" FROM "table_name"
+def select_columns(table_name, selection):
+    msg = ""
+    
+    if (selection == "*"):
+        sql = "SELECT * FROM {}".format(table_name)
+        msg = "selected all columns from {} table.".format(table_name)
+    else:
+        sql = "SELECT {} FROM {}".format(selection, table_name)
+        msg = "selected {} columns from {}.".format(selection, table_name)
+        
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM {}".format(table_name))
+    mycursor.execute(sql)
 
     myresult = mycursor.fetchall()
 
-    print("selected all columns from {} table.".format(table_name))
-    return myresult
-
-
-# Retrieves data from specified columns "column_names" from "table_name"
-# SQL = SELECT "column_names" FROM "table_name"
-def select_certain_columns(table_name, column_names):
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT {} FROM {}".format(column_names, table_name))
-
-    myresult = mycursor.fetchall()
-
-    print("selected {} columns from {}.".format(column_names, table_name))
+    print(msg)
     return myresult
 
 
@@ -135,15 +119,32 @@ def insert_data(table_name, data):
     print("data inserted to {} table successfully.".format(table_name))
 
 
+# Adds foreign key "foreign_key" to table "table_name"
+# SQL = ALTER TABLE "table_name" ADD FOREIGN KEY ("foreign_key") REFERENCES "reference_table"(reference_key)
+def add_foreign_key(table_name, foreign_key, reference_table, reference_key):
+    mycursor = mydb.cursor()
+    mycursor.execute("ALTER TABLE {} ADD FOREIGN KEY ({}) REFERENCES {}({})".format(table_name, foreign_key, reference_table, reference_key))
+
+    mydb.commit()
+    
+    print("Foreign key constraint on {} added to {} table".format(foreign_key, table_name))
+
+
 # Test Data
-# print(select_all_columns("test"))
+# print(select_columns("edit_history", "*"))
 # print("\n")
-# print(select_certain_columns("test", "id, name"))
+
+# print(select_columns("edit_history", "id, edited_by"))
 # print("\n")
+
 # update_data("test", "id", "1", "name", "Bianca")
 # print("\n")
-# print(select_all_columns("test"))
 
+# print(select_all_columns("test"))
+# print("\n")
+
+# print(add_foreign_key("edit_history", "product_id", "product", "id"))
+# print("\n")
 
 # data = {
 #     "name": "William",
