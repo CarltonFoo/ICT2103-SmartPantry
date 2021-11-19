@@ -88,7 +88,7 @@ def logout():
 
 @blueprint.route('/price_checker')
 def price_checker():
-    food_items = sql_commands.select_all_columns("food_item")
+    food_items = sql_commands.select_columns("food_item", "*")
 
     return render_template('home/pricechecker.html', food_items=food_items)
 
