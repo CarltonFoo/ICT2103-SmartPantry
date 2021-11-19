@@ -23,15 +23,15 @@ class _Demographic:
     """Class contains attribute age, gender and height"""
     def __init__(self, data) -> None:
         if self.hasData(data, "age", "gender", "height"):
-            self.__age = data["age"]
+            self.__age = int(data["age"])
             self.__gender = data["gender"]
-            self.__height = data["height"]
+            self.__height = float(data["height"])
 
     def setDemographic(self, data) -> None:
         """Setter method for attributes in class Demographic"""
-        self.__age = data["age"]
+        self.__age = int(data["age"])
         self.__gender = data["gender"]
-        self.__height = data["height"]
+        self.__height = float(data["height"])
 
     def getDemographic(self) ->dict:
         """Return all attributes data in type dict"""
