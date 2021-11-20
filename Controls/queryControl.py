@@ -3,7 +3,7 @@ from Model.user import User
 from Objects.sql_commands import delete_data, insert_data, select_all_columns
 
 
-def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
+def queryingOn(data=None, table_name:str=None,method:str = "SELECT", db:str = "SQL"):
     if data is None and table_name is None:
         return
     elif data is None:
