@@ -32,7 +32,7 @@
                         <h5>Search for food</h5>
                         <button type="button" id="viewListBtn" class="btn btn-primary float-right" data-toggle="modal" data-target="#shoppingListModal">View Shopping List</button>
                         <div id="shoppingListModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="shoppingListModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLiveLabel">Shopping List</h5>
@@ -44,33 +44,18 @@
                                                 <thead>
                                                     <tr>
                                                         <th>Food Item</th>
+                                                        <th>Quantity</th>
                                                         <th>Price</th>
-                                                        <th>Action</th>
+                                                        <th>Remove</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="shoppingList">
-                                                    <tr>
-                                                        <td>Mark</td>
-                                                        <td>Otto</td>
-                                                        <td>
-                                                            <button type="button" class="btn  btn-icon btn-outline-danger"><i class="feather icon-x"></i></button>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Jacob</td>
-                                                        <td>Thornton</td>
-                                                        <td></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Larry</td>
-                                                        <td>the Bird</td>
-                                                        <td></td>
-                                                    </tr>
                                                 </tbody>
                                                 <tfoot>
                                                     <tr>
                                                         <td>Total Amount:</td>
                                                         <td>$<span id="totalAmt"></span></td>
+                                                        <td></td>
                                                         <td></td>
                                                     </tr>
                                                 </tfoot>
@@ -79,7 +64,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn  btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn  btn-success">Checkout</button>
+                                        <button type="button" id="checkoutBtn" class="btn  btn-success">Checkout</button>
                                     </div>
                                 </div>
                             </div>
@@ -96,7 +81,7 @@
                                         <th>#</th>
                                         <th>Food Item</th>
                                         <th>Price</th>
-                                        <th>Action</th>
+                                        <th>Add</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -140,12 +125,17 @@
     });;
 
     $(".addBtn").click(function() {
+        var already_added;
+        var list_index;
+
         var food_item = {
             id: "",
             fid: $(this).data('fid'),
             food_name: $(this).data('name'),
             weight: $(this).data('weight'),
-            price: $(this).data('price')
+            price: $(this).data('price'),
+            quantity: 1,
+            total_weight: $(this).data('weight'),
         };
 
         if (localStorage.getItem("food_items") == null) {
@@ -154,17 +144,35 @@
             food_item.id = 0;
         } else {
             food_items = JSON.parse(localStorage.getItem("food_items"));
-            food_items[food_items.length] = food_item;
-            food_items[0].id = 1;
-            food_item.id = food_items.length;
-            localStorage.setItem("food_items", JSON.stringify(food_items));
+
+            food_items.forEach((element, index, array) => {
+                if (element["food_name"] == food_item.food_name) {
+                    already_added = true;
+                    list_index = index;
+                }
+            });
+
+            if (already_added) {
+                food_items[list_index].quantity += 1;
+
+                var total_weight = parseFloat(food_items[list_index].total_weight);
+                total_weight += parseFloat(food_items[list_index].weight);
+                food_items[list_index].total_weight = total_weight;
+
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+            } else {
+                food_items[food_items.length] = food_item;
+                food_items[0].id = 1;
+                food_item.id = food_items.length;
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+            }
         }
         alert("Item added!");
         console.log(food_items);
     });
 
     $("#viewListBtn").click(function() {
-        var food_items = JSON.parse(localStorage.getItem("food_items"));
+        food_items = JSON.parse(localStorage.getItem("food_items"));
 
         $("#shoppingList").empty();
         $("#totalAmt").empty();
@@ -176,18 +184,23 @@
         }
 
         food_items.forEach(function(food_item, index) {
-            $("#shoppingList").append("<tr><td>" + food_item.food_name + " (" + food_item.weight + "g) " + "</td><td>$" +
-                food_item.price + "</td><td><button type='button' data-id='" + food_item.id + "' class='btn btn-icon btn-outline-danger deleteBtn'><i class='feather icon-x'></i></button></tr>");
+            var buttons_html = "<div class='btn-group mb-2' role='group' aria-label='Basic example'> \
+                <button type='button' class='btn  btn-outline-primary addQtyBtn' data-index='" + index + "'><i class='feather icon-plus'></i></button> \
+                <button type='button' class='btn  btn-outline-primary'><span id='foodQty" + index + "'>" + food_item.quantity + "</span></button> \
+                <button type='button' class='btn  btn-outline-primary minusQtyBtn' data-index='" + index + "'><i class='feather icon-minus'></i></button></div>"
 
-            totalAmt += food_item.price;
+            $("#shoppingList").append("<tr><td>" + food_item.food_name + " (<span id='foodWeight" + index + "'>" + food_item.total_weight + "</span>g) " +
+                "</td><td>" + buttons_html + "</td><td id='foodPrice" + index + "'>$" +
+                (food_item.price * food_item.quantity).toFixed(2) + "</td><td><button type='button' data-id='" + food_item.id +
+                "' class='btn btn-icon btn-outline-danger deleteBtn'><i class='feather icon-x'></i></button></td></tr>");
+
+            totalAmt += food_item.price * food_item.quantity;
         });
 
         $("#totalAmt").empty();
         $("#totalAmt").append(totalAmt.toFixed(2));
 
         $(".deleteBtn").click(function() {
-            food_items = JSON.parse(localStorage.getItem("food_items"));
-
             var id = $(this).data('id');
             var food_index = 0;
 
@@ -197,7 +210,7 @@
                 }
             });
 
-            var currentAmt = food_items[food_index].price;
+            var currentAmt = food_items[food_index].price * food_items[food_index].quantity;
 
             food_items.splice(food_index, 1);
             localStorage.setItem("food_items", JSON.stringify(food_items));
@@ -207,6 +220,96 @@
             $("#totalAmt").empty();
             $("#totalAmt").append(totalAmt.toFixed(2));
         });
+
+        $(".addQtyBtn").click(function() {
+            var index = $(this).data('index');
+            var total_weight = parseFloat(food_items[index].total_weight);
+
+            food_items[index].quantity += 1;
+            total_weight += parseFloat(food_items[index].weight);
+            food_items[index].total_weight = total_weight;
+
+            $("#foodQty" + index).text(food_items[index].quantity);
+            $("#foodWeight" + index).text(food_items[index].total_weight);
+            localStorage.setItem("food_items", JSON.stringify(food_items));
+
+            totalAmt += food_items[index].price;
+            $("#foodPrice" + index).text("$" + (food_items[index].quantity * food_items[index].price).toFixed(2));
+
+            $("#totalAmt").empty();
+            $("#totalAmt").append(totalAmt.toFixed(2));
+        });
+
+        $(".minusQtyBtn").click(function() {
+            var index = $(this).data('index');
+            var total_weight = parseFloat(food_items[index].total_weight);
+
+            if (food_items[index].quantity > 0) {
+                food_items[index].quantity -= 1;
+                total_weight -= parseFloat(food_items[index].weight);
+                food_items[index].total_weight = total_weight;
+
+                $("#foodQty" + index).text(food_items[index].quantity);
+                $("#foodWeight" + index).text(food_items[index].total_weight);
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+
+                totalAmt -= food_items[index].price;
+                $("#foodPrice" + index).text("$" + (food_items[index].quantity * food_items[index].price).toFixed(2));
+
+                $("#totalAmt").empty();
+                $("#totalAmt").append(totalAmt.toFixed(2));
+            }
+        });
     });
+
+    $("#checkoutBtn").click(function() {
+        if (food_items.length == 0) {
+            alert("Current shopping list is empty. Please add items before going to checkout.")
+        } else {
+            if (confirm("Are you sure you want to purchase these items?")) {
+                var receipt_id;
+                $.ajax({
+                    url: '/insert_receipt',
+                    type: 'POST',
+                    success: function(data) {
+                        receipt_id = data.receipt_id[0];
+
+                        addFoodItem(receipt_id);
+
+                        // Emptying the shopping list stored in localstorage
+                        food_items = [];
+                        localStorage.setItem("food_items", JSON.stringify(food_items));
+
+                        alert("Successfully checked out items.");
+                        $('#shoppingListModal').modal('hide');
+                    }
+                });
+            }
+        }
+    });
+
+    function addFoodItem(receipt_id) {
+        food_items = JSON.parse(localStorage.getItem("food_items"));
+
+        var today = new Date();
+        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+
+        food_items.forEach(function(food_item) {
+            $.ajax({
+                url: '/insert_receipt_ingredient',
+                async: false,
+                type: 'POST',
+                data: {
+                    receipt_id: receipt_id,
+                    fid: food_item.fid,
+                    weight: food_item.total_weight,
+                    date: date
+                },
+                success: function() {
+                    console.log(food_item.food_name + " has been checked out successfully.");
+                }
+            });
+        });
+    }
 </script>
 {% endblock javascripts %}

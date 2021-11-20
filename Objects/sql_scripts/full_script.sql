@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS user(
 );
 
 CREATE TABLE IF NOT EXISTS receipt (
-  receipt_id INT NOT NULL UNIQUE,
+  receipt_id INT AUTO_INCREMENT NOT NULL UNIQUE,
   uid INT NOT NULL,
   FOREIGN KEY(uid) REFERENCES user(uid),
   PRIMARY KEY(receipt_id)

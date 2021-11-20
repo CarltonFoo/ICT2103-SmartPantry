@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, jsonify
 from flask_login import (
     current_user,
     login_user,
@@ -13,6 +13,7 @@ from apps.authentication.models import Users
 from apps.authentication.util import verify_pass
 
 from Objects import sql_commands
+
 
 @blueprint.route('/')
 def route_default():
@@ -96,24 +97,59 @@ def price_checker():
 @blueprint.route('/grocery_history')
 def grocery_history():
     return render_template('home/history.html')
+
+
+@blueprint.route('/insert_receipt', methods=["POST"])
+def insert_receipt():
+    if request.method == 'POST':
+        receipt = {
+            "uid": current_user.id
+        }
+        
+        sql_commands.insert_data("receipt", receipt)
+        
+        mycursor = sql_commands.mydb.cursor()
+        mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+        receipt_id = mycursor.fetchone()
+        
+        return jsonify({'receipt_id': receipt_id})
+
+
+@ blueprint.route('/insert_receipt_ingredient', methods=["POST"])
+def insert_receipt_ingredient():
+    if request.method == 'POST':
+        receipt_id = request.form['receipt_id']
+        fid = request.form['fid']
+        weight = request.form['weight']
+        date = request.form['date']
+
+        receipt_ingredient = {
+            "receipt_id": receipt_id,
+            "fid": fid,
+            "weight": weight,
+            "date": date
+        }
+        sql_commands.insert_data("receipt_ingredient", receipt_ingredient)
+
+        return jsonify({'response': "OK"})
+
+
 # Errors
-
-
-@login_manager.unauthorized_handler
+@ login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('home/page-403.html'), 403
 
 
-@blueprint.errorhandler(403)
+@ blueprint.errorhandler(403)
 def access_forbidden(error):
     return render_template('home/page-403.html'), 403
 
 
-@blueprint.errorhandler(404)
+@ blueprint.errorhandler(404)
 def not_found_error(error):
     return render_template('home/page-404.html'), 404
 
 
-@blueprint.errorhandler(500)
+@ blueprint.errorhandler(500)
 def internal_error(error):
     return render_template('home/page-500.html'), 500
