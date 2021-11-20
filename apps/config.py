@@ -8,7 +8,7 @@ class Config(object):
     # Set up SQL username and password
     SQL_USERNAME=os.getenv("SQL_USERNAME")
     SQL_PASSWORD = os.getenv("SQL_PASSWORD")
-
+    MONGO_URI = os.getenv('MONGO_URI')
     # Set up the App SECRET_KEY
     SECRET_KEY = config('SECRET_KEY', default='S#perS3crEt_007')
 

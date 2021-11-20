@@ -2,11 +2,12 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
-
-
+from flask_pymongo import PyMongo
+from .extensions import mongo
+from .recipeNOSQL.recipeNOSQL import recipeNOSQL
+from .foodNOSQL.foodNOSQL import foodNOSQL
 db = SQLAlchemy()
 login_manager = LoginManager()
-
 
 def register_extensions(app):
     db.init_app(app)
@@ -33,6 +34,9 @@ def configure_database(app):
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
+    mongo.init_app(app)
+    app.register_blueprint(recipeNOSQL)
+    app.register_blueprint(foodNOSQL)
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
