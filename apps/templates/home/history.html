@@ -36,7 +36,7 @@
                             <input type="text" id="search" class="form-control" placeholder="Search for your purchase">
                         </div>
                         <div class="table-responsive">
-                            <table id="purchaseTable" class="table table-striped">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -46,7 +46,7 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="purchaseTable">
                                     {% for i in range(purchases | length) %}
                                     <tr>
                                         <td>{{ purchases[i][3] }}</td>
