@@ -189,7 +189,7 @@
                 <button type='button' class='btn  btn-outline-primary'><span id='foodQty" + index + "'>" + food_item.quantity + "</span></button> \
                 <button type='button' class='btn  btn-outline-primary minusQtyBtn' data-index='" + index + "'><i class='feather icon-minus'></i></button></div>"
 
-            $("#shoppingList").append("<tr><td>" + food_item.food_name + " (<span id='foodWeight" + index + "'>" + food_item.total_weight + "</span>g) " +
+            $("#shoppingList").append("<tr><td>" + food_item.food_name + " (<span id='foodWeight" + index + "'>" + food_item.weight + "</span>g) " +
                 "</td><td>" + buttons_html + "</td><td id='foodPrice" + index + "'>$" +
                 (food_item.price * food_item.quantity).toFixed(2) + "</td><td><button type='button' data-id='" + food_item.id +
                 "' class='btn btn-icon btn-outline-danger deleteBtn'><i class='feather icon-x'></i></button></td></tr>");
@@ -230,7 +230,7 @@
             food_items[index].total_weight = total_weight;
 
             $("#foodQty" + index).text(food_items[index].quantity);
-            $("#foodWeight" + index).text(food_items[index].total_weight);
+            // $("#foodWeight" + index).text(food_items[index].total_weight);
             localStorage.setItem("food_items", JSON.stringify(food_items));
 
             totalAmt += food_items[index].price;
@@ -250,7 +250,7 @@
                 food_items[index].total_weight = total_weight;
 
                 $("#foodQty" + index).text(food_items[index].quantity);
-                $("#foodWeight" + index).text(food_items[index].total_weight);
+                // $("#foodWeight" + index).text(food_items[index].total_weight);
                 localStorage.setItem("food_items", JSON.stringify(food_items));
 
                 totalAmt -= food_items[index].price;

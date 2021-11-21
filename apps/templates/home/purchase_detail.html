@@ -1,0 +1,33 @@
+{% for purchase in purchases %}
+<div class="table-responsive">
+    <table class="table table-borderless">
+        <tbody>
+            <tr>
+                <td><strong>Receipt ID</strong></td>
+                <td> </td>
+                <td>#{{ purchase[3] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Food Items</strong></td>
+                <td> </td>
+                <td>{% for i in range(details["food_items"] | length) %} x {{ details["food_quantity"][i] }} {{ details["food_items"][i] }} ({{ details["original_weight"][i] }}g)<br> {% endfor %}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Amount</strong></td>
+                <td> </td>
+                <td>${{ total_amt }}</td>
+            </tr>
+            <tr>
+                <td><strong>Purchase Date</strong></td>
+                <td> </td>
+                <td>{{ purchase[5] }}</td>
+            </tr>
+            <!-- <tr>
+                <td><strong></strong></td>
+                <td> </td>
+                <td></td>
+            </tr> -->
+        </tbody>
+    </table>
+</div>
+{% endfor %}
