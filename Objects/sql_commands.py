@@ -1,6 +1,15 @@
 import mysql.connector
-from os import getenv
 
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '../','.env')
+load_dotenv(dotenv_path)
+
+SQL_USERNAME = os.environ.get("SQL_USERNAME")
+SQL_PASSWORD = os.environ.get("SQL_PASSWORD")
+SQL_DATABASE = os.environ.get("SQL_DATABASE")
 
 def __listToStr(listOfData):
     """Convert list to a string with coma separated"""
@@ -21,9 +30,9 @@ class SQL_Database:
     def __init__(self) -> None:
         self.db = mysql.connector.connect(
             host="localhost",
-            user=getenv("SQL_USERNAME"),
-            password=getenv("SQL_PASSWORD"),
-            database=getenv("SQL_DATABASE")
+            user=SQL_USERNAME,
+            password=SQL_PASSWORD,
+            database=SQL_DATABASE
         )
         self.cursor = self.db.cursor()
 
@@ -34,17 +43,19 @@ class SQL_Database:
         col_values: Type of list. Values corresponding to given headers
         table_name: Type of str. String representation of table
         ."""
-        if len(getheaders) != len(filter_values):
-            raise ValueError("Lists of headers and values have different length")
         if table_name is None:
             raise ValueError("Table name is empty")
 
-        if getheaders is None and filterBy is None:
-            self.cursor.execute(f"selected * columns from {table_name}")
-        elif filterBy is None:
-            self.cursor.execute(f"selected {__listToStr(getheaders)} columns from {table_name}")
-        elif getheaders is None:
-            self.cursor.execute(f"SELECT * columns from {table_name} WHERE {__concatList(filterBy, filter_values)}")        
+        if getheaders is None and filterBy is None and filter_values is None:
+            self.cursor.execute(f"SELECT * from {table_name}")
+        else:
+            if len(filterBy) != len(filter_values):
+                raise ValueError("Lists of filterBy and filter_values have different length")
+
+            if filterBy is None:
+                self.cursor.execute(f"SELECT {__listToStr(getheaders)} from {table_name}")
+            elif getheaders is None:
+                self.cursor.execute(f"SELECT * from {table_name} WHERE {__concatList(filterBy, filter_values)}")        
         return self.cursor.fetchall()
 
 
@@ -77,26 +88,26 @@ class SQL_Database:
 
 # Retrieves data from all the columns from "table_name"
 # SQL = SELECT * FROM "table_name"
-def select_all_columns(table_name):
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM {}".format(table_name))
+# def select_all_columns(table_name):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("SELECT * FROM {}".format(table_name))
 
-    myresult = mycursor.fetchall()
+#     myresult = mycursor.fetchall()
 
-    print("selected all columns from {} table.".format(table_name))
-    return myresult
+#     print("selected all columns from {} table.".format(table_name))
+#     return myresult
 
 
 # Retrieves data from specified columns "column_names" from "table_name"
 # SQL = SELECT "column_names" FROM "table_name"
-def select_certain_columns(table_name, column_names):
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT {} FROM {}".format(column_names, table_name))
+# def select_certain_columns(table_name, column_names):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("SELECT {} FROM {}".format(column_names, table_name))
 
-    myresult = mycursor.fetchall()
+#     myresult = mycursor.fetchall()
 
-    print("selected {} columns from {}.".format(column_names, table_name))
-    return myresult
+#     print("selected {} columns from {}.".format(column_names, table_name))
+#     return myresult
 
 
 
@@ -105,54 +116,54 @@ def select_certain_columns(table_name, column_names):
 
 # Updates "table_name" by setting the "column_name" = "value" where the "identifier" = "identifier_value"
 # SQL = UPDATE "table_name" SET "column_name" = "value" WHERE "identifier" = "identifier_value"
-def update_data(table_name, identifier, identifier_value, column_name, value):
-    mycursor = mydb.cursor()
-    mycursor.execute("UPDATE {} SET {} = '{}' WHERE {} = '{}'".format(
-        table_name, column_name, value, identifier, identifier_value))
+# def update_data(table_name, identifier, identifier_value, column_name, value):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("UPDATE {} SET {} = '{}' WHERE {} = '{}'".format(
+#         table_name, column_name, value, identifier, identifier_value))
 
-    mydb.commit()
+#     mydb.commit()
 
-    print("{} table updated successfully.".format(table_name))
+#     print("{} table updated successfully.".format(table_name))
 
 
 # Deletes the row from "table_name" where the "identifier" = "identifier_value"
 # SQL = DELETE FROM "table_name" WHERE "identifier" = "identifier_value"
-def delete_data(table_name, identifier, identifier_value):
-    mycursor = mydb.cursor()
+# def delete_data(table_name, identifier, identifier_value):
+#     mycursor = mydb.cursor()
 
-    isinstance(identifier_value, str)
+#     isinstance(identifier_value, str)
 
-    if (not isinstance):
-        mycursor.execute("DELETE FROM {} WHERE {} = {}".format(
-            table_name, identifier, identifier_value))
-    else:
-        mycursor.execute("DELETE FROM {} WHERE {} = '{}'".format(
-            table_name, identifier, identifier_value))
+#     if (not isinstance):
+#         mycursor.execute("DELETE FROM {} WHERE {} = {}".format(
+#             table_name, identifier, identifier_value))
+#     else:
+#         mycursor.execute("DELETE FROM {} WHERE {} = '{}'".format(
+#             table_name, identifier, identifier_value))
 
-    mydb.commit()
+#     mydb.commit()
 
-    print("data deleted from {} table successfully.".format(table_name))
+#     print("data deleted from {} table successfully.".format(table_name))
 
 
 # Deletes all data in "table_name"
 # SQL = DELETE FROM "table_name"
-def delete_all(table_name):
-    mycursor = mydb.cursor()
-    mycursor.execute("DELETE FROM {}".format(table_name))
+# def delete_all(table_name):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("DELETE FROM {}".format(table_name))
 
-    mydb.commit()
+#     mydb.commit()
 
-    reset_index(table_name)
+#     reset_index(table_name)
 
-    print("deleted all data from {} table successfully".format(table_name))
+#     print("deleted all data from {} table successfully".format(table_name))
 
 
 # Resets auto-increment index of "table_name" *Don't use (mainly for delete_all function)
-def reset_index(table_name):
-    mycursor = mydb.cursor()
-    mycursor.execute("ALTER TABLE {} AUTO_INCREMENT = 1".format(table_name))
+# def reset_index(table_name):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("ALTER TABLE {} AUTO_INCREMENT = 1".format(table_name))
 
-    mydb.commit()
+#     mydb.commit()
 
 
 # Inserts data values into "table_name"
@@ -162,35 +173,35 @@ def reset_index(table_name):
 #     "name": "William",
 #     "desc": "person3"
 # }
-def insert_data(table_name, data):
-    columns = []
-    values = []
+# def insert_data(table_name, data):
+#     columns = []
+#     values = []
 
-    for key, value in data.items():
-        columns.append(key)
-        values.append(value)
+#     for key, value in data.items():
+#         columns.append(key)
+#         values.append(value)
 
-    columns_string = ', '.join(f"`{w}`" for w in columns)
-    values_string = ', '.join(f"'{w}'" for w in values)
+#     columns_string = ', '.join(f"`{w}`" for w in columns)
+#     values_string = ', '.join(f"'{w}'" for w in values)
 
-    mycursor = mydb.cursor()
-    sql = "INSERT INTO " + table_name + \
-        " (" + columns_string + ") VALUES (" + values_string + ")"
+#     mycursor = mydb.cursor()
+#     sql = "INSERT INTO " + table_name + \
+#         " (" + columns_string + ") VALUES (" + values_string + ")"
 
-    mycursor.execute(sql)
-    mydb.commit()
+#     mycursor.execute(sql)
+#     mydb.commit()
 
-    print("data inserted to {} table successfully.".format(table_name))
+#     print("data inserted to {} table successfully.".format(table_name))
 
 
 # Test Data
-print(select_all_columns("test"))
-print("\n")
-print(select_certain_columns("test", "id, name"))
-print("\n")
-update_data("test", "id", "1", "name", "Bianca")
-print("\n")
-print(select_all_columns("test"))
+# print(select_all_columns("test"))
+# print("\n")
+# print(select_certain_columns("test", "id, name"))
+# print("\n")
+# update_data("test", "id", "1", "name", "Bianca")
+# print("\n")
+# print(select_all_columns("test"))
 
 
 data = {
@@ -202,6 +213,10 @@ data = {
 # insert_data("test", data)
 
 # Delete
-print("\n")
+# print("\n")
 # delete_data("test", "id", "5")
 # delete_all("test")
+
+
+a = SQL_Database()
+print(a.select_data(table_name="user"))
