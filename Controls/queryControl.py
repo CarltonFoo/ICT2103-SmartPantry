@@ -1,9 +1,9 @@
 import Objects.sql_commands
 from Model.user import User
-from Objects.sql_commands import delete_data, insert_data, select_all_columns
+from Objects.sql_commands import delete_data, insert_data, select_columns
 
 
-def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
+def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, data=None):
     if data is None and table_name is None:
         return
     elif data is None:
@@ -11,7 +11,7 @@ def queryingOn(data=None, table_name:str=None,method:str = "SELECT"):
 
     if method == "SELECT":
         #mySQL
-        sql_result = select_all_columns(table_name=table_name)
+        sql_result = select_columns(selection, table_name, data)
         #noSQL
         nosql_result = None
         

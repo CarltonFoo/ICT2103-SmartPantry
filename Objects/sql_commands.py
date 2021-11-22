@@ -9,6 +9,20 @@ mydb = mysql.connector.connect(
     database="smartpantry"
 )
 
+
+def __listToStr(listOfData):
+    """Convert list to a string with coma separated"""
+    return ",".join(listOfData)
+
+
+def __concatList(list1: list = None, list2: list = None, char: str = "="):
+    combine = zip(list1, list2)
+    result = []
+    for ele1, ele2 in combine:
+        result.append(ele1 + char + ele2)
+
+    return result
+
 # Things to do: create functions for the following SQL statements
 # SELECT /
 # UPDATE /
@@ -18,22 +32,46 @@ mydb = mysql.connector.connect(
 
 # ["*"] Retrieves data from "table_name" or ["column_names"] Retrieves data from specified columns "column_names" from "table_name"
 # SQL = SELECT * FROM "table_name" or SELECT "column_names" FROM "table_name"
-def select_columns(table_name, selection):
+
+def select_data(self, getheaders: list = None, filterBy: list = None, filter_values: list = None, table_name: str = None):
+    """SQL Query data based on 3 inputs headers, values and table name.
+    headers: Type of list. Header name
+    col_values: Type of list. Values corresponding to given headers
+    table_name: Type of str. String representation of table
+    ."""
+    if len(getheaders) != len(filter_values):
+        raise ValueError(
+            "Lists of headers and values have different length")
+    if table_name is None:
+        raise ValueError("Table name is empty")
+
+    if getheaders is None and filterBy is None:
+        self.cursor.execute(f"selected * columns from {table_name}")
+    elif filterBy is None:
+        self.cursor.execute(
+            f"selected {__listToStr(getheaders)} columns from {table_name}")
+    elif getheaders is None:
+        self.cursor.execute(
+                f"SELECT * columns from {table_name} WHERE {__concatList(filterBy, filter_values)}")
+    return self.cursor.fetchall()
+
+
+def select_columns(selection, table_name, where):
     msg = ""
     
     if (selection == "*"):
-        sql = "SELECT * FROM {}".format(table_name)
-        msg = "selected all columns from {} table.".format(table_name)
+        sql = "SELECT * FROM {} WHERE {}".format(table_name, where)
+        msg = "selected all columns from {} table where {}.".format(table_name, where)
     else:
-        sql = "SELECT {} FROM {}".format(selection, table_name)
-        msg = "selected {} columns from {}.".format(selection, table_name)
+        sql = "SELECT {} FROM {} WHERE {}".format(selection, table_name, where)
+        msg = "selected {} columns from {} where {}.".format(
+            selection, table_name, where)
         
-    mycursor = mydb.cursor()
+    mycursor = mydb.cursor(dictionary=True)
     mycursor.execute(sql)
 
     myresult = mycursor.fetchall()
 
-    print(msg)
     return myresult
 
 
