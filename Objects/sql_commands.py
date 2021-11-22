@@ -1,10 +1,11 @@
 import mysql.connector
+import os
 
 # Database connection
 mydb = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="password",
+    user=os.environ['SQL_USERNAME'],
+    password=os.environ['SQL_PASSWORD'],
     database="smartpantry"
 )
 
