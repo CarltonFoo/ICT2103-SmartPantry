@@ -1,12 +1,59 @@
 import mysql.connector
+from os import getenv
 
-# Database connection
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="ict2103project_database"
-)
+
+def __listToStr(listOfData):
+    """Convert list to a string with coma separated"""
+    return ",".join(listOfData)
+
+def __concatList(list1:list =None, list2:list = None, char:str = "="):
+    combine = zip(list1, list2)
+    result = []
+    for ele1 , ele2 in combine:
+        result.append(ele1 + char + ele2)
+
+    return result
+
+
+# SQL Database connection
+class SQL_Database:
+    """Class represents sql dataabase, and contains attributes and methods pertaining to SQL"""
+    def __init__(self) -> None:
+        self.db = mysql.connector.connect(
+            host="localhost",
+            user=getenv("SQL_USERNAME"),
+            password=getenv("SQL_PASSWORD"),
+            database=getenv("SQL_DATABASE")
+        )
+        self.cursor = self.db.cursor()
+
+    def select_data(self, getheaders:list = None, filterBy:list = None, filter_values:list =None, table_name:str = None):
+        """SQL Query data based on 3 inputs headers, values and table name.
+
+        headers: Type of list. Header name
+        col_values: Type of list. Values corresponding to given headers
+        table_name: Type of str. String representation of table
+        ."""
+        if len(getheaders) != len(filter_values):
+            raise ValueError("Lists of headers and values have different length")
+        if table_name is None:
+            raise ValueError("Table name is empty")
+
+        if getheaders is None and filterBy is None:
+            self.cursor.execute(f"selected * columns from {table_name}")
+        elif filterBy is None:
+            self.cursor.execute(f"selected {__listToStr(getheaders)} columns from {table_name}")
+        elif getheaders is None:
+            self.cursor.execute(f"SELECT * columns from {table_name} WHERE {__concatList(filterBy, filter_values)}")        
+        return self.cursor.fetchall()
+
+
+# mydb = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     password="",
+#     database="ict2103project_database"
+# )
 
 # Things to do: create functions for the following SQL statements
 # SELECT /
@@ -50,6 +97,10 @@ def select_certain_columns(table_name, column_names):
 
     print("selected {} columns from {}.".format(column_names, table_name))
     return myresult
+
+
+
+
 
 
 # Updates "table_name" by setting the "column_name" = "value" where the "identifier" = "identifier_value"
