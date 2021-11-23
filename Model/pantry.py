@@ -3,15 +3,17 @@ from base import Base, PantryItem
 
 class Pantry(Base, PantryItem):
     
-    def __init__(self, uid, fid, weight) -> None:
+    def __init__(self, data:dict) -> None:
 
-        if self.hasData(uid, fid, weight):
-            self.__uid = uid
-            self.__fid = fid
-            self.__weight=weight
+        if self.hasData(data, "uid", "fid","weight"):
+            self.__uid = int(data["uid"])
+            self.__fid = int(data["fid"])
+            self.__weight= float(data["weight"])
 
-    def setPantry(self, weight):
-            self.__weight = weight
-    def getter(self):
+    def setPantry(self, data:dict):
+            if self.hasData(data, "uid", "fid", "weight"):
+                self.__weight = float(data["weight"])
+
+    def getPantry(self) ->dict:
         """Return all attributes data in type dict"""
-        return {**self.__uid(), **self.__fid(), **self.__weight()}
+        return {"uid":self.__uid, "fid":self.__fid, "weight":self.__weight}
