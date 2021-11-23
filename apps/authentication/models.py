@@ -28,7 +28,7 @@ class Receipts_Ingredient(db.Model):
 class pantry(db.Model):
     __tablename__ = 'pantry'
 
-    uid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     fid = db.Column(db.Integer, primary_key=True)
     weight = db.Column(db.FLOAT())
 
@@ -37,7 +37,7 @@ class Users(db.Model, UserMixin):
 
     __tablename__ = 'user'
 
-    uid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     gender = db.Column(db.String(1))
