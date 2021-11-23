@@ -4,11 +4,19 @@ from apps import db, login_manager
 
 from apps.authentication.util import hash_pass
 
+class pantry(db.Model):
+    __tablename__ = 'pantry'
+
+    uid = db.Column(db.Integer, primary_key=True)
+    fid = db.Column(db.Integer, primary_key=True)
+    weight = db.Column(db.FLOAT(), nullable=False)
+
+
 class Users(db.Model, UserMixin):
 
     __tablename__ = 'user'
 
-    id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
     gender = db.Column(db.String(1))
@@ -47,3 +55,6 @@ def request_loader(request):
     username = request.form.get('username')
     user = Users.query.filter_by(username=username).first()
     return user if user else None
+
+
+
