@@ -39,10 +39,7 @@ class _Demographic:
 
 class User(Base, _Credential, _Demographic):
     """Class inherited classes Base, Credential and Demographic"""
-    def __init__(self,jsonData) -> None:
-        data = self.getJSON(jsonData=jsonData)
-        if data is  False:
-            raise TypeError("Parsed data is not in JSON format")
+    def __init__(self,data) -> None:
         Base.__init__(self, data)
         _Credential.__init__(self, data)
         _Demographic.__init__(self, data)

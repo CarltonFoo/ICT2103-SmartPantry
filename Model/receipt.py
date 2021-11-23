@@ -2,7 +2,7 @@ from Model.base import Base
 from Model.food_item import food_item
 
 
-class receipt(Base):
+class Receipt(Base):
     """Class inherited from Base and contains addition attributes list(food_item)"""
     def __init__(self, jsonData) -> None:
         data = self.getJSON(jsonData=jsonData)
