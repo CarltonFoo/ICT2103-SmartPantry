@@ -1,5 +1,4 @@
-from Model.base import Item
-from base import Base, Item
+from base import Base
 
 class MealHistory(Base):
     def __init__(self, data) -> None:
