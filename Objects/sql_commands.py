@@ -78,30 +78,35 @@ class SQL_Database:
         table_name: Type of str. String representation of table
         ."""
         if table_name is None or table_name.isspace():
-            raise ValueError("Table name cannot be Null value or whitespace characters")
+            raise ValueError(
+                "Table name cannot be Null value or whitespace characters")
 
         if getheaders is None and filterBy is None and filterVal is None:
             self.cursor.execute(f"SELECT * from {table_name}")
         else:
             if len(filterBy) != len(filterVal):
-                raise ValueError("Lists of filterBy and filterVal have different length")
+                raise ValueError(
+                    "Lists of filterBy and filterVal have different length")
 
             if filterBy is None:
                 cols = listToStr(getheaders)
                 self.cursor.execute(f"SELECT {cols} from {table_name}")
             elif getheaders is None:
                 where = concatList(filterBy, filterVal)
-                self.cursor.execute(f"SELECT * from {table_name} WHERE {where}")
-                
+                self.cursor.execute(
+                    f"SELECT * from {table_name} WHERE {where}")
+
         return self.cursor.fetchall()
 
-    def insert_data(self, table_name: str = None, table_columns: list = None, values: tuple = None):
+    def insert_data(self, table_name: str = None, table_columns: list = None, values: list = None):
         columns_string = listToStr(table_columns)
         values_string = ', '.join(f"{w}" for w in values)
 
-        sql = "INSERT INTO " + table_name + \
-            " (" + columns_string + ") VALUES" + values_string
-
+        if "," not in values_string:
+            sql = "INSERT INTO " + table_name + " (" + columns_string + ") VALUES(" + values_string + ")"
+        else:
+            sql = "INSERT INTO " + table_name + " (" + columns_string + ") VALUES" + values_string
+            
         self.cursor.execute(sql)
         self.db.commit()
 
@@ -109,23 +114,26 @@ class SQL_Database:
 
     def delete_data(self, table_name: str, identifier: str = None, identifier_value: str = None):
         if table_name is None or table_name.isspace():
-            raise ValueError("Table name cannot be Null value or whitespace characters")
-        
+            raise ValueError(
+                "Table name cannot be Null value or whitespace characters")
+
         if identifier is None and identifier_value is None:
             self.cursor.execute(f"DELETE FROM {table_name}")
             self.db.commit()
 
             print(f"{table_name} table deleted successfully.")
         else:
-            self.cursor.execute(f'DELETE FROM {table_name} WHERE {identifier}="{identifier_value}"')
+            self.cursor.execute(
+                f'DELETE FROM {table_name} WHERE {identifier}="{identifier_value}"')
             self.db.commit()
 
             print(f"data deleted from {table_name} table successfully.")
-            
-    def update_data(self, table_name:str, data:dict, identifier:str, identifier_value:str):
+
+    def update_data(self, table_name: str, data: dict, identifier: str, identifier_value: str):
         if table_name is None or table_name.isspace():
-            raise ValueError("Table name cannot be Null value or whitespace characters")
-        
+            raise ValueError(
+                "Table name cannot be Null value or whitespace characters")
+
         if data is not None:
             for key, value in data.items():
                 sql = ""
@@ -139,8 +147,6 @@ class SQL_Database:
 
             self.db.commit()
             print(f"{table_name} table updated successfully.")
-
-
 
 
 # mydb = mysql.connector.connect(
@@ -283,12 +289,10 @@ class SQL_Database:
 
 # Insert
 # insert_data("test", data)
-
 # Delete
 # print("\n")
 # delete_data("test", "id", "5")
 # delete_all("test")
-
 data = {
     "food_name": "pineapple",
     "price": 5.00,
@@ -306,9 +310,17 @@ food_item_values = [
     )
 ]
 
+receipts = [
+    (
+        1
+    )
+]
+
 a = SQL_Database()
-print(a.select_data(table_name="food_item"))
+# print(a.select_data(table_name="food_item"))
+# a.insert_data(table_name="receipt", table_columns=["uid"], values=receipts)
 # a.insert_data(table_name="food_item", table_columns=["fid", "food_name", "price", "weight", "calories"], values=food_item_values)
 # a.delete_data(table_name="food_item", identifier="fid", identifier_value="47")
 # a.delete_data(table_name="test")
 # a.update_data("food_item", data=data, identifier="fid", identifier_value="47")
+
