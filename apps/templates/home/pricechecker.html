@@ -36,16 +36,17 @@
                             <h5>Search for items</h5>
                         </div>
                         <div class="card-body table-border-style">
-                            <form method="post" id="geocoding_form1">
+
+                            <form role="form" method="get" action="/pricechecker">
                                 <div class="input-group input-group-button mb-3">
-                                    <input type="text" id="search" class="form-control" placeholder="Write your place">
+                                    <input type="text" id="searchinput" name="search" class="form-control" placeholder="Write your place">
                                     <span class="input-group-addon" id="basic-addon1">
-                                        <button class="btn btn-primary m-0">Search Items</button>
+                                        <button type="submit" class="btn btn-primary m-0">Search Items</button>
                                     </span>
                                 </div>
                             </form>
                             
-							<div class="table-responsive">
+                            <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
@@ -58,7 +59,7 @@
                                     <tbody>
                                         {% for item in data %}
                                         <tr>
-                                            <td>1</td>
+                                            <td>{{item.id}}</td>
                                             <td>{{item.username}}</td>
                                             <td>{{item.password}}</td>
                                             <td>{{item.profile_bio}}</td>

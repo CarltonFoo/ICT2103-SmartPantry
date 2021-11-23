@@ -35,7 +35,7 @@
 					<div class="card-body">
 						<h5>Edit Profile Details</h5>
 						<hr>
-						<form role="form" method="post" action="/profile">
+						<form role="form" method="post" action="/updateprofile">
 							{% for item in data %}
 							<div class="form-row">
 								<div class="form-group col-md-6">
@@ -86,7 +86,7 @@
 								<textarea type="text" class="form-control" id="dietInput" name="diet" placeholder="Dietary Needs">{{item.dietary_needs}}</textarea>
 							</div>
 							{% endfor %}
-							<button type="submit" class="btn  btn-primary">Save</button>
+							<button type="submit" class="btn btn-primary">Save</button>
 						</form>
 					</div>
 				</div>

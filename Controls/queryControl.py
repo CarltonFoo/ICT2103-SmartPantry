@@ -11,7 +11,7 @@ def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, d
 
     if method == "SELECT":
         #mySQL
-        sql_result = select_columns(selection, table_name, data)
+        sql_result = select_columns(selection=selection, table_name=table_name, where=data)
         #noSQL
         nosql_result = None
         

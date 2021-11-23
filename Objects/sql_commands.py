@@ -39,40 +39,52 @@ def select_data(self, getheaders: list = None, filterBy: list = None, filter_val
     col_values: Type of list. Values corresponding to given headers
     table_name: Type of str. String representation of table
     ."""
-    if len(getheaders) != len(filter_values):
-        raise ValueError(
-            "Lists of headers and values have different length")
-    if table_name is None:
-        raise ValueError("Table name is empty")
+    try:
+        if len(getheaders) != len(filter_values):
+            raise ValueError(
+                "Lists of headers and values have different length")
+        if table_name is None:
+            raise ValueError("Table name is empty")
 
-    if getheaders is None and filterBy is None:
-        self.cursor.execute(f"selected * columns from {table_name}")
-    elif filterBy is None:
-        self.cursor.execute(
-            f"selected {__listToStr(getheaders)} columns from {table_name}")
-    elif getheaders is None:
-        self.cursor.execute(
+        if getheaders is None and filterBy is None:
+            self.cursor.execute(f"selected * columns from {table_name}")
+        elif filterBy is None:
+            self.cursor.execute(
+                f"selected {__listToStr(getheaders)} columns from {table_name}")
+        elif getheaders is None:
+            self.cursor.execute(
                 f"SELECT * columns from {table_name} WHERE {__concatList(filterBy, filter_values)}")
-    return self.cursor.fetchall()
+    finally:
+        self.cursor.close()
+        print("cur closed")
 
 
-def select_columns(selection, table_name, where):
+def select_columns(selection=None, table_name=None, where=None):
     msg = ""
-    
-    if (selection == "*"):
-        sql = "SELECT * FROM {} WHERE {}".format(table_name, where)
-        msg = "selected all columns from {} table where {}.".format(table_name, where)
-    else:
-        sql = "SELECT {} FROM {} WHERE {}".format(selection, table_name, where)
-        msg = "selected {} columns from {} where {}.".format(
-            selection, table_name, where)
-        
-    mycursor = mydb.cursor(dictionary=True)
-    mycursor.execute(sql)
+    try:
+        if (selection == "*") and where:
+            sql = "SELECT * FROM {} WHERE {}".format(table_name, where)
+            msg = "selected all columns from {} table where {}.".format(table_name, where)
+        elif (selection == "*") and not where:
+            sql = "SELECT * FROM {}".format(table_name,)
+            msg = "selected all columns from {} table.".format(table_name)
+        elif not selection and where:
+            sql = "SELECT {} FROM {} WHERE {}".format(selection, table_name, where)
+            msg = "selected {} columns from {} where {}.".format(
+                selection, table_name, where)
+        elif where:
+            sql = "SELECT {} FROM {}".format(selection, table_name)
+            msg = "selected {} columns from {}.".format(
+                selection, table_name)
+            
+        mycursor = mydb.cursor(dictionary=True)
+        mycursor.execute(sql)
 
-    myresult = mycursor.fetchall()
-
-    return myresult
+        myresult = mycursor.fetchall()
+        return myresult
+    finally:
+        mycursor.close()
+        print("cur closed")
 
 
 # Updates "table_name" by setting the "column_name" = "value" where the "identifier" = "identifier_value"

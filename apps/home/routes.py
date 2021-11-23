@@ -27,10 +27,8 @@ def route_template(template):
             template += '.html'
             
         if template == "profile.html":
-            selection = "*"
             where = "username ='" + str(current_user) + "'"
-            data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
-            print(data)
+            data = queryingOn(method="SELECT", selection="*", table_name="user", data=where)
         
         if template == "recipes.html":
             data = [("dummy data")]
@@ -39,7 +37,7 @@ def route_template(template):
             data = [("dummy data")]
             
         if template == "pricechecker.html":
-            data = [("dummy data")]
+            data = queryingOn(method="SELECT", selection="*", table_name="user")
             
         if template == "budgeting.html":
             data = [("dummy data")]
@@ -64,58 +62,80 @@ def route_template(template):
         return render_template('home/page-500.html'), 500
 
 
-@blueprint.route('/profile', methods=['GET', 'POST'])
+@blueprint.route('/updateprofile', methods=['GET', 'POST'])
 @login_required
 def saveDetails():
-    print("clicked")
-    if request.method == 'POST':
-        if request.form['username']:
-            user = Users.query.filter_by(username=request.form['username']).first()
-            if not user:
-                username = str(request.form['username'])
-                height = str(request.form['height'])
-                weight = str(request.form['weight'])
-                age = str(request.form['age'])
-                gender = str(request.form['gender'])
-                bio = str(request.form['bio'])
-                diet = str(request.form['diet'])
-                
-                sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + \
-                    age + ', gender = "' + gender + '", profile_bio = "' + bio + \
-                    '", dietary_needs = "' + diet + \
-                    '" WHERE username = "' + str(current_user) + '";'
-                print(sql)
-                
-                if request.form['password']:
-                    password = str(request.form['password'])
-                    passhash = str(hash_pass(password)).split("'")[1]
+    print("Updating profile...")
+    try: 
+        if request.method == 'POST':
+            if request.form['username']:
+                user = Users.query.filter_by(username=request.form['username']).first()
+                if not user:
+                    username = str(request.form['username'])
+                    height = str(request.form['height'])
+                    weight = str(request.form['weight'])
+                    age = str(request.form['age'])
+                    gender = str(request.form['gender'])
+                    bio = str(request.form['bio'])
+                    diet = str(request.form['diet'])
                     
-                    sql = 'UPDATE user SET username = "' + username + '", password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + \
-                        age + ', gender = "' + gender + '", profile_bio = "' + bio + \
-                        '", dietary_needs = "' + diet + \
-                        '" WHERE username = "' + str(current_user) + '";'
+                    sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
                     print(sql)
-
-                mycursor = mydb.cursor()
-                mycursor.execute(sql)
-                mydb.commit()
-
-                selection = "*"
-                where = "username ='" + str(current_user) + "'"
-                data = queryingOn(method="SELECT", selection=selection,
-                                table_name="user", data=where)
-                result = "Profile updated successfully!"
                     
+                    if request.form['password']:
+                        password = str(request.form['password'])
+                        passhash = str(hash_pass(password)).split("'")[1]
+                        
+                        sql = 'UPDATE user SET username = "' + username + '", password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
+
+                    mycursor = mydb.cursor()
+                    mycursor.execute(sql)
+                    mydb.commit()
+                    
+
+                    selection = "*"
+                    where = "username ='" + str(current_user) + "'"
+                    data = queryingOn(method="SELECT", selection=selection,
+                                    table_name="user", data=where)
+                    result = "Profile updated successfully!"
+                        
+                else:
+                    selection = "*"
+                    where = "username ='" + str(current_user) + "'"
+                    data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
+                    result = "Username exists"
+
+                print(result)
+                return render_template('home/profile.html', data=data)
+    finally:
+        mycursor.close()
+        print("cur closed")
+
+
+@blueprint.route('/pricechecker', methods=['GET'])
+@login_required
+def searchItem():
+    print("Searching item...")
+    try:
+        if request.method == 'GET':
+            input = str(request.args.get("search"))
+            sql = "SELECT * FROM user WHERE username LIKE '%" + input + "%'"
+
+            mycursor = mydb.cursor(buffered=True, dictionary=True)
+            mycursor.execute(sql)
+            mydb.commit()
+            data = mycursor.fetchall()
+            print("data", data)
+            
+            if data:
+                return render_template('home/pricechecker.html', data=data)
             else:
-                selection = "*"
-                where = "username ='" + str(current_user) + "'"
-                data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
-                result = "Username exists"
-
-            print(result)
-            return render_template('home/profile.html', data=data)
-
-
+                data = queryingOn(method="SELECT", selection="*", table_name="user")
+                return render_template('home/pricechecker.html', data=data)
+    finally:
+        mycursor.close()
+        print("cur closed")
+    
 
 # Helper - Extract current page name from request
 def get_segment(request):
