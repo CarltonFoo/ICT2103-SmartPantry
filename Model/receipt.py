@@ -4,14 +4,11 @@ from Model.food_item import food_item
 
 class Receipt(Base):
     """Class inherited from Base and contains addition attributes list(food_item)"""
-    def __init__(self, jsonData) -> None:
-        data = self.getJSON(jsonData=jsonData)
-        self.__ingredients = []
-        if data is  False:
-            raise TypeError("Parsed data is not in JSON format")
+    def __init__(self, data) -> None:
         Base.__init__(self, data)
-        for item in data["ingredient"]:
-            self.__ingredients = self.__ingredients.append(food_item(data))
+        if self.hasData(data, "uid", "fid"):
+            self.__uid = data["uid"]
+            self.__fid = data["fid"]
 
     def getIngredient(self):
         """Return all attributes of ingredients in type dict"""
