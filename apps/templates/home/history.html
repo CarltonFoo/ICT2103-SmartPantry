@@ -52,7 +52,7 @@
                                         <td>{{ purchases[i][3] }}</td>
                                         <td>{{ purchases[i][0] }}</td>
                                         <!-- <td>$</td> -->
-                                        <td>{{ purchases[i][5] }}</td>
+                                        <td>{{ purchases[i][5].strftime('%d %b %Y') }}</td>
                                         <td>
                                             <button type="button" class="btn btn-warning viewDetails" data-id="{{ purchases[i][3] }}">View Details</button>
                                         </td>

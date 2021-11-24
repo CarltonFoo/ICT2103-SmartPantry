@@ -83,8 +83,7 @@ def get_purchase():
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
 
-        details = {"food_items": [],
-                   "food_quantity": [], "original_weight": []}
+        details = {"food_items": [], "food_quantity": [], "original_weight": []}
 
         food_list = []
         price_list = []
