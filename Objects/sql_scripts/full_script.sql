@@ -16,7 +16,7 @@ calories INT,
  primary key(rid)
  );
  CREATE TABLE IF NOT EXISTS user(
-uid INT AUTO_INCREMENT UNIQUE, 
+id INT AUTO_INCREMENT UNIQUE, 
 username VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   gender CHAR(1) NOT NULL,
@@ -29,8 +29,8 @@ username VARCHAR(255) NOT NULL,
   );
   CREATE TABLE IF NOT EXISTS receipt (
 receipt_id INT NOT NULL UNIQUE,
-uid INT NOT NULL,
-FOREIGN KEY(uid) REFERENCES user(uid),
+id INT NOT NULL,
+FOREIGN KEY(id) REFERENCES user(id),
 PRIMARY KEY(receipt_id)
 );
 CREATE TABLE IF NOT EXISTS receipt_ingredient (
@@ -43,12 +43,12 @@ FOREIGN KEY(fid) REFERENCES food_item(fid),
 PRIMARY KEY(receipt_id,fid)
 );
 CREATE TABLE IF NOT EXISTS pantry(
-uid INT NOT NULL,
+id INT NOT NULL,
 fid INT NOT NULL,
 weight float NOT NULL,
-FOREIGN KEY(uid) REFERENCES user(uid),
+FOREIGN KEY(id) REFERENCES user(id),
 FOREIGN KEY(fid) REFERENCES food_item(fid),
-PRIMARY KEY(uid,fid)
+PRIMARY KEY(id,fid)
 );
 CREATE TABLE IF NOT EXISTS recipe_ingredient(
 rid INT NOT NULL,
@@ -60,12 +60,12 @@ PRIMARY KEY(rid,fid)
 );
 CREATE TABLE IF NOT EXISTS MealHistory ( 
  rid INT NOT NULL,
- uid INT NOT NULL,
+ id INT NOT NULL,
  date DATETIME NOT NULL,
  type VARCHAR(255) NOT NULL references recipe(type),
  FOREIGN KEY(rid) REFERENCES recipe(rid),
- FOREIGN KEY(uid) REFERENCES user(uid),
- PRIMARY KEY(rid,uid)
+ FOREIGN KEY(id) REFERENCES user(id),
+ PRIMARY KEY(rid,id)
  );
  
 

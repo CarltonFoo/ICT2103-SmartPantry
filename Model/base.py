@@ -19,7 +19,7 @@ class DataParserInterface:
             raise ValueError(f'selection has no {selection}')
 
 
-    def  getJSON(self, jsonData):
+    def getJSON(self, jsonData):
         try:
             # Parse JSON from String
             return json.loads(jsonData)

@@ -1,5 +1,6 @@
 from abc import abstractclassmethod
 import mysql.connector
+import os
 
 import os
 from os.path import join, dirname
@@ -131,25 +132,19 @@ class SQL_Database:
 #     database="ict2103project_database"
 # )
 
-# Things to do: create functions for the following SQL statements
-# SELECT /
-# UPDATE /
-# DELETE /
-# INSERT /
+
+def __listToStr(listOfData):
+    """Convert list to a string with coma separated"""
+    return ",".join(listOfData)
 
 
-# def create_database(db_name):
-#     mydb = mysql.connector.connect(
-#         host="localhost",
-#         user="root",
-#         password=""
-#     )
+def __concatList(list1: list = None, list2: list = None, char: str = "="):
+    combine = zip(list1, list2)
+    result = []
+    for ele1, ele2 in combine:
+        result.append(ele1 + char + ele2)
 
-#     mycursor = mydb.cursor()
-#     mycursor.execute("CREATE DATABASE %s" % db_name)
-
-#     print("{} database created successfully.".format(db_name))
-
+    return result
 
 # Retrieves data from all the columns from "table_name"
 # SQL = SELECT * FROM "table_name"
@@ -259,6 +254,17 @@ class SQL_Database:
 #     print("data inserted to {} table successfully.".format(table_name))
 
 
+# Adds foreign key "foreign_key" to table "table_name"
+# SQL = ALTER TABLE "table_name" ADD FOREIGN KEY ("foreign_key") REFERENCES "reference_table"(reference_key)
+def add_foreign_key(table_name, foreign_key, reference_table, reference_key):
+    mycursor = mydb.cursor()
+    mycursor.execute("ALTER TABLE {} ADD FOREIGN KEY ({}) REFERENCES {}({})".format(table_name, foreign_key, reference_table, reference_key))
+
+    mydb.commit()
+    
+    print("Foreign key constraint on {} added to {} table".format(foreign_key, table_name))
+
+
 # Test Data
 # print(select_all_columns("test"))
 # print("\n")
@@ -268,11 +274,22 @@ class SQL_Database:
 # print("\n")
 # print(select_all_columns("test"))
 
+# print(select_columns("edit_history", "id, edited_by"))
+# print("\n")
 
-data = {
-    "desc": "person3",
-    "name": "William",
-}
+# update_data("test", "id", "1", "name", "Bianca")
+# print("\n")
+
+# print(select_all_columns("test"))
+# print("\n")
+
+# print(add_foreign_key("edit_history", "product_id", "product", "id"))
+# print("\n")
+
+# data = {
+#     "name": "William",
+#     "desc": "person3"
+# }
 
 # Insert
 # insert_data("test", data)
@@ -283,6 +300,6 @@ data = {
 # delete_all("test")
 
 
-a = SQL_Database()
+# a = SQL_Database()
 # print(a.update_data(table_name="user",data=data, filterBy=["name"], filterVal=["william"]))
-print(a.insert_data(table_name="user", data=data))
+# print(a.insert_data(table_name="user", data=data))
