@@ -67,6 +67,7 @@ def register():
 
         # else we can create the user
         user = Users(**request.form)
+        
         db.session.add(user)
         db.session.commit()
 
