@@ -1,12 +1,25 @@
+.row {
+    height: 16rem;
+    padding-bottom: 30px;
+}
+
 .order-card {
-    height: 10rem;
+    height: 100%;
 }
 
 .cardcontent {
     display: inline-flex;
 }
 
+.cardtitle {
+    font-size: 28px;
+}
+
+.carddesc {
+    font-size: 18px;
+}
+
 .cardicon {
-    font-size: 55px !important;
-    padding: 10px;
+    font-size: 48px !important;
+    padding: 10px 0 10px 10px;
 }
