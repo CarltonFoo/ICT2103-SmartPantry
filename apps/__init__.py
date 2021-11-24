@@ -6,6 +6,7 @@ from flask_pymongo import PyMongo
 from .extensions import mongo
 from .recipeNOSQL.recipeNOSQL import recipeNOSQL
 from .foodNOSQL.foodNOSQL import foodNOSQL
+from .usersNOSQL.usersNOSQL import usersNOSQL
 db = SQLAlchemy()
 login_manager = LoginManager()
 
@@ -36,6 +37,7 @@ def create_app(config):
     app.config.from_object(config)
     app.register_blueprint(recipeNOSQL)
     app.register_blueprint(foodNOSQL)
+    app.register_blueprint(usersNOSQL)
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)

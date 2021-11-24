@@ -84,4 +84,19 @@ def get_recipe_under_calories(calories):
             mimetype="application/json"
         )
 
-# 
+# get all recipe matching food item
+@recipeNOSQL.route('/recipe/suggest/<food>')
+def get_suggest_recipe(food):
+    try:
+        recipe_collection = mongo.Recipe
+        recipe_list = list(recipe_collection.find({'Ingredients':{'$elemMatch':{'food_name':food}}}))
+        for recipe in recipe_list:
+            recipe["_id"] = str(recipe["_id"])
+        return jsonify(recipe_list)
+    except Exception as ex:
+        print(ex)
+        return Response(
+            response=json.dumps({"message":"No such recipe"}),
+            status=500,
+            mimetype="application/json"
+        )

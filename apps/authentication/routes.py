@@ -1,3 +1,4 @@
+from dns import exception
 from flask import render_template, redirect, request, url_for
 from flask_login import (
     current_user,
@@ -9,9 +10,9 @@ from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
-
+from apps.authentication.util import hash_pass
 from apps.authentication.util import verify_pass
-
+from ..extensions import mongo
 
 @blueprint.route('/')
 def route_default():
@@ -53,7 +54,7 @@ def login():
 def register():
     create_account_form = CreateAccountForm(request.form)
     if 'register' in request.form:
-
+        
         # name = request.form['name']
         username = request.form['username']
 
@@ -67,9 +68,27 @@ def register():
 
         # else we can create the user
         user = Users(**request.form)
-        
+ 
         db.session.add(user)
         db.session.commit()
+        # adding to mongo db user
+        
+        try:
+            print(request.form)
+            user = {
+                "username": request.form['username'],
+                "gender": request.form['gender'],
+                "age": request.form['age'],
+                "height": request.form['height'],
+                "weight": request.form['weight'],
+                "dietary_needs": request.form['dietary_needs'],
+                "pantry": []
+            }
+
+            user_collection = mongo.user
+            user_collection.insert_one(user)
+        except exception as ex:
+            print(ex)
 
         return render_template('accounts/register.html',
                                msg='User created please <a href="/login">login</a>',
