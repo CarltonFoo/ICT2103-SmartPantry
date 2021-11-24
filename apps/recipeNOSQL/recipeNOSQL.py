@@ -10,7 +10,7 @@ recipeNOSQL = Blueprint('recipeNOSQL',__name__)
 @recipeNOSQL.route('/recipe',methods=['GET'])
 def get_all_recipes():
     try:
-        recipe_collection = mongo.db.Recipe
+        recipe_collection = mongo.Recipe
         recipe_list = list(recipe_collection.find())
         for recipe in recipe_list:
             recipe["_id"] = str(recipe["_id"])
@@ -26,7 +26,7 @@ def get_all_recipes():
 @recipeNOSQL.route('/recipe/<name>',methods=['GET'])
 def get_recipe(name):
     try:
-        recipe_collection = mongo.db.Recipe
+        recipe_collection = mongo.Recipe
         recipe = recipe_collection.find_one({'recipe_name':name})
         recipe["_id"] = str(recipe["_id"])
         return jsonify(recipe)
@@ -71,7 +71,7 @@ def insert_recipe():
 @recipeNOSQL.route('/recipe/calories/<calories>')
 def get_recipe_under_calories(calories):
     try:
-        recipe_collection = mongo.db.Recipe
+        recipe_collection = mongo.Recipe
         recipe_list = list(recipe_collection.find({'Calories':{'$lte':int(calories)}}))
         for recipe in recipe_list:
             recipe["_id"] = str(recipe["_id"])

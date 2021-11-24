@@ -34,7 +34,6 @@ def configure_database(app):
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
-    mongo.init_app(app)
     app.register_blueprint(recipeNOSQL)
     app.register_blueprint(foodNOSQL)
     register_extensions(app)
