@@ -65,12 +65,10 @@ def price_checker():
 @blueprint.route('/grocery_history')
 def grocery_history():
     mycursor = db.cursor
-    sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
+    sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
 
     mycursor.execute(sql)
     purchases = mycursor.fetchall()
-    
-    
 
     return render_template('home/history.html', purchases=purchases)
 
@@ -80,7 +78,7 @@ def get_purchase():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
 
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
         mycursor = db.cursor
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
@@ -110,11 +108,11 @@ def get_purchase():
             quantity = final_weight_list[i] / original_weight_list[i]
             quantity_list.append(int(quantity))
 
-        total_amt = 0
-        for i in range(len(price_list)):
-            total_amt += price_list[i] * quantity_list[i]
+        # total_amt = 0
+        # for i in range(len(price_list)):
+        #     total_amt += price_list[i] * quantity_list[i]
 
-        total_amt = "{:.2f}".format(total_amt)
+        # total_amt = "{:.2f}".format(total_amt)
 
         details["food_items"] = food_list
         details["food_quantity"] = quantity_list
@@ -122,19 +120,22 @@ def get_purchase():
 
         print(details)
 
-        return render_template('home/purchase_detail.html', purchases=purchases, details=details, total_amt=total_amt)
+        return render_template('home/purchase_detail.html', purchases=purchases, details=details)
 
 
 @blueprint.route('/insert_receipt', methods=["POST"])
 def insert_receipt():
     if request.method == 'POST':
+        total_amt = request.form['total_amt']
+        
         receipt = [
             (
-                current_user.id
+                current_user.id,
+                total_amt
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=["uid"], values=receipt)
+        db.insert_data(table_name="receipt", table_columns=["uid, total_amount"], values=receipt)
 
         mycursor = db.cursor
         mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")

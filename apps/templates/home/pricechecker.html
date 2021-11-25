@@ -276,6 +276,8 @@
 
     // Handles shopping list checkout - Saves as receipt + receipt ingredients
     $("#checkoutBtn").click(function() {
+        var total_amt = parseFloat($("#totalAmt").text());
+
         if (food_items.length == 0) {
             alert("Current shopping list is empty. Please add items before going to checkout.")
         } else {
@@ -284,6 +286,9 @@
                 $.ajax({
                     url: '/insert_receipt',
                     type: 'POST',
+                    data: {
+                        "total_amt": total_amt
+                    },
                     success: function(data) {
                         receipt_id = data.receipt_id[0];
 
