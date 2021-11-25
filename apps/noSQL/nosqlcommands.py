@@ -152,3 +152,29 @@ def update_user(username):
             mimetype="application/json"
         )
     
+# Insert food item into the user's pantry
+def insert_pantry(username,food_item):
+    try:
+        user_collection = mongo.user
+     
+        user_collection.update_one(
+            {'username':username},
+            {
+                "$push":{
+                    "pantry": food_item
+                }
+            }
+        )
+        return Response(    
+                response=json.dumps({"message":"user updated"}),
+                status=200,
+                mimetype="application/json"
+            ) 
+    except exception as ex:
+        print(ex)
+        return Response(
+            response=json.dumps({"message":"cannot read Recipe"}),
+            status=500,
+            mimetype="application/json"
+        )
+

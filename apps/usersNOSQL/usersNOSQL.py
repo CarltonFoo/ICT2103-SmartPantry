@@ -91,12 +91,33 @@ def update_user(username):
             status=500,
             mimetype="application/json"
         )
-# update the pantry list
-@usersNOSQL.route("/users/pantry/<username>",methods=['PATCH'])
-def update_pantry():
-    pass
+# inserting food items into the pantry list
+@usersNOSQL.route("/users/pantry/<username>",methods=['POST'])
+def update_pantry(username):
+    try:
+        user_collection = mongo.user
+        pantry_item = {
+            "food_name":request.form['food'],
+            "measurement(g)":request.form['measurement']
+        }
+        user_collection.update_one(
+            {'username':username},
+            {
+                "$push":{
+                    "pantry": pantry_item
+                }
+            }
+        )
+        return Response(    
+                response=json.dumps({"message":"user updated"}),
+                status=200,
+                mimetype="application/json"
+            ) 
+    except exception as ex:
+        print(ex)
+        return Response(
+            response=json.dumps({"message":"cannot read Recipe"}),
+            status=500,
+            mimetype="application/json"
+        )
 
-# update receipt
-@usersNOSQL.route("/users/receipt/<username>",methods=['PATCH'])
-def update_receipts(username):
-    pass
