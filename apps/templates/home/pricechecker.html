@@ -85,6 +85,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="foodTable">
+                                    <!-- Shows each food item as a table record -->
                                     {% for item in food_items %}
                                     <tr>
                                         <td>{{ item[0] }}</td>
@@ -116,6 +117,7 @@
     food_items = [];
 
     $(document).ready(function() {
+        // Search function on table
         $("#search").on("keyup", function() {
             var value = $(this).val().toLowerCase();
             $("#foodTable tr").filter(function() {
@@ -124,10 +126,12 @@
         });
     });;
 
+    // Adds food item to shopping list
     $(".addBtn").click(function() {
         var already_added;
         var list_index;
 
+        // Food item object
         var food_item = {
             id: "",
             fid: $(this).data('fid'),
@@ -138,6 +142,7 @@
             total_weight: $(this).data('weight'),
         };
 
+        // Adds shopping list to localstorage
         if (localStorage.getItem("food_items") == null) {
             food_items[0] = food_item;
             localStorage.setItem("food_items", JSON.stringify(food_items));
@@ -152,6 +157,7 @@
                 }
             });
 
+            // Adjusts quantity of added food item
             if (already_added) {
                 food_items[list_index].quantity += 1;
 
@@ -171,6 +177,7 @@
         console.log(food_items);
     });
 
+    // Shows shopping list items and calculates total amount
     $("#viewListBtn").click(function() {
         food_items = JSON.parse(localStorage.getItem("food_items"));
 
@@ -183,6 +190,7 @@
             $("#totalAmt").append("0");
         }
 
+        // Loads each food item in shopping list (edit quantity + delete btn)
         food_items.forEach(function(food_item, index) {
             var buttons_html = "<div class='btn-group mb-2' role='group' aria-label='Basic example'> \
                 <button type='button' class='btn  btn-outline-primary addQtyBtn' data-index='" + index + "'><i class='feather icon-plus'></i></button> \
@@ -194,12 +202,14 @@
                 (food_item.price * food_item.quantity).toFixed(2) + "</td><td><button type='button' data-id='" + food_item.id +
                 "' class='btn btn-icon btn-outline-danger deleteBtn'><i class='feather icon-x'></i></button></td></tr>");
 
+            // Calculates total amount
             totalAmt += food_item.price * food_item.quantity;
         });
 
         $("#totalAmt").empty();
         $("#totalAmt").append(totalAmt.toFixed(2));
 
+        // Removes food item from shopping list
         $(".deleteBtn").click(function() {
             var id = $(this).data('id');
             var food_index = 0;
@@ -221,6 +231,7 @@
             $("#totalAmt").append(totalAmt.toFixed(2));
         });
 
+        // Increases quantity of food item and recalculates total amount
         $(".addQtyBtn").click(function() {
             var index = $(this).data('index');
             var total_weight = parseFloat(food_items[index].total_weight);
@@ -240,6 +251,7 @@
             $("#totalAmt").append(totalAmt.toFixed(2));
         });
 
+        // Decreases quantity of food item and recalculates total amount
         $(".minusQtyBtn").click(function() {
             var index = $(this).data('index');
             var total_weight = parseFloat(food_items[index].total_weight);
@@ -262,6 +274,7 @@
         });
     });
 
+    // Handles shopping list checkout - Saves as receipt + receipt ingredients
     $("#checkoutBtn").click(function() {
         if (food_items.length == 0) {
             alert("Current shopping list is empty. Please add items before going to checkout.")
@@ -288,6 +301,7 @@
         }
     });
 
+    // AJAX POST request to insert each receipt ingredient into db
     function addFoodItem(receipt_id) {
         food_items = JSON.parse(localStorage.getItem("food_items"));
 

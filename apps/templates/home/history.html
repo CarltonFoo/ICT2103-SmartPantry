@@ -47,6 +47,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="purchaseTable">
+                                    <!-- Shows each purchase as a table record -->
                                     {% for i in range(purchases | length) %}
                                     <tr>
                                         <td>{{ purchases[i][3] }}</td>
@@ -90,6 +91,7 @@
 {% block javascripts %}
 <script>
     $(document).ready(function() {
+        // Search function on table
         $("#search").on("keyup", function() {
             var value = $(this).val().toLowerCase();
             $("#purchaseTable tr").filter(function() {
@@ -98,6 +100,7 @@
         });
     });;
 
+    // Shows detail of each purchase history
     $(".viewDetails").click(function() {
         var receipt_id = $(this).data('id');
         $.ajax({

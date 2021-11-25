@@ -69,6 +69,8 @@ def grocery_history():
 
     mycursor.execute(sql)
     purchases = mycursor.fetchall()
+    
+    
 
     return render_template('home/history.html', purchases=purchases)
 
@@ -132,12 +134,10 @@ def insert_receipt():
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=[
-                       "uid"], values=receipt)
+        db.insert_data(table_name="receipt", table_columns=["uid"], values=receipt)
 
         mycursor = db.cursor
-        mycursor.execute(
-            "SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+        mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
         receipt_id = mycursor.fetchone()
 
         return jsonify({'receipt_id': receipt_id})
