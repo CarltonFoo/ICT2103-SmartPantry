@@ -82,7 +82,8 @@ def register():
                 "height": request.form['height'],
                 "weight": request.form['weight'],
                 "dietary_needs": request.form['dietary_needs'],
-                "pantry": []
+                "pantry": [],
+                "receipt":[]
             }
 
             user_collection = mongo.user

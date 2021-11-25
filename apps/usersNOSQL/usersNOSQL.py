@@ -95,3 +95,8 @@ def update_user(username):
 @usersNOSQL.route("/users/pantry/<username>",methods=['PATCH'])
 def update_pantry():
     pass
+
+# update receipt
+@usersNOSQL.route("/users/receipt/<username>",methods=['PATCH'])
+def update_receipts(username):
+    pass
