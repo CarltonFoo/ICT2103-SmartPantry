@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, jsonify
 from flask_login import (
     current_user,
     login_user,
@@ -86,22 +86,21 @@ def logout():
 
 
 # Errors
-
-@login_manager.unauthorized_handler
+@ login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('home/page-403.html'), 403
 
 
-@blueprint.errorhandler(403)
+@ blueprint.errorhandler(403)
 def access_forbidden(error):
     return render_template('home/page-403.html'), 403
 
 
-@blueprint.errorhandler(404)
+@ blueprint.errorhandler(404)
 def not_found_error(error):
     return render_template('home/page-404.html'), 404
 
 
-@blueprint.errorhandler(500)
+@ blueprint.errorhandler(500)
 def internal_error(error):
     return render_template('home/page-500.html'), 500
