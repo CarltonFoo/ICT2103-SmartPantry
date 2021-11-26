@@ -12,6 +12,9 @@ from Objects.sql_commands import db
 from apps.authentication.util import hash_pass
 from apps.authentication.models import Users
 
+from Objects.nosql_commands import NOSQL
+
+nosql = NOSQL()
 
 @blueprint.route('/index')
 @login_required
@@ -172,7 +175,7 @@ def grocery_history():
         user_id = current_user.id
         
         mycursor = db.cursor
-        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.uid = '{}'".format(user_id)
+        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
         
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
@@ -187,7 +190,7 @@ def grocery_history():
         return jsonify({'purchases': monthly_totals})
     else:
         mycursor = db.cursor
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(current_user.id)
 
         mycursor.execute(sql)
         purchases = mycursor.fetchall()        
@@ -211,7 +214,7 @@ def get_purchase():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
 
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
         mycursor = db.cursor
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
@@ -268,7 +271,7 @@ def insert_receipt():
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=["uid, total_amount"], values=receipt)
+        db.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
         mycursor = db.cursor
         mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
@@ -296,3 +299,121 @@ def insert_receipt_ingredient():
         db.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})
+    
+    
+@blueprint.route('/inventory.html')
+def GetPantryItems():
+    sql4 = "SELECT id FROM user WHERE username= '" + str(current_user) + "'"
+    mycursor4 = db.cursor(buffered=True, dictionary=True)
+    mycursor4.execute(sql4)
+    id = mycursor4.fetchall()
+    sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(
+        current_user) + "')"
+
+    mycursor = db.cursor(buffered=True, dictionary=True)
+    mycursor.execute(sql)
+    db.commit()
+    pantry_items = mycursor.fetchall()
+    print("data", pantry_items)
+    sql2 = "SELECT SUM(weight) FROM pantry WHERE id=(SELECT id FROM user WHERE username= '" + \
+        str(current_user) + "')"
+    mycursor2 = db.cursor(buffered=True, dictionary=True)
+    mycursor2.execute(sql2)
+    pantryheaviest = mycursor2.fetchall()
+    sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+        current_user) + "'))"
+    mycursor3 = db.cursor(buffered=True, dictionary=True)
+    mycursor3.execute(sql3)
+    fooditem = mycursor3.fetchall()
+    #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+    #mycursor4 = db.cursor(buffered=True, dictionary=True)
+    #mycursor4.execute(sql4)
+    #maxfoodname= mycursor3.fetchall()
+
+    return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+
+
+@blueprint.route('/updatepantry', methods=['GET', 'POST'])
+def update3():
+    if request.method == "POST":
+        weight = str(request.form['weight'])
+        fid = str(request.form['fidsss'])
+        sql = "UPDATE pantry SET weight = '" + weight + \
+            "' WHERE id = (SELECT id FROM user WHERE username= '" + \
+            str(current_user) + "') AND fid =" + str(fid)
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        data = mycursor.fetchall()
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        db.commit()
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
+
+    
+@blueprint.route('/Createpantry', methods=['GET', 'POST'])
+def Create():
+    if request.method == "POST":
+        id = "1"
+        weight = str(request.form['createweight'])
+        fid = str(request.form['colours'])
+
+        pantryitems = [
+            (
+                id,
+                fid,
+                weight
+            )
+        ]
+        sql = "INSERT INTO pantry (id, fid, weight) VALUES ((SELECT id FROM user WHERE username= '" + \
+            str(current_user) + "'), '" + fid + "', '" + weight + "')"
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+@blueprint.route('/Removepantry', methods=['GET', 'POST'])
+def delete():
+    if request.method == "POST":
+        id = "1"
+        fid = str(request.form['fidssr'])
+        sql = "DELETE FROM pantry WHERE id = (SELECT id FROM user WHERE username= '" + str(
+            current_user) + "') AND fid = '" + fid + "'"
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
