@@ -1,5 +1,5 @@
-from apps.home import blueprint
-from flask import render_template, request, jsonify
+from apps.home import mysqlbp, nosqlbp
+from flask import render_template, request
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from Objects import sql_commands
@@ -16,14 +16,23 @@ from Objects.nosql_commands import NOSQL
 
 nosql = NOSQL()
 
-@blueprint.route('/index')
+@mysqlbp.route('/index')
 @login_required
 def index():
+    data = [("Data being pulled from MySQL database!"),
+            ("MySQL is an open-source relational database management system.")]
+    return render_template('home/index.html', segment='index', data=data)
 
-    return render_template('home/index.html', segment='index')
+
+@nosqlbp.route('/index')
+@login_required
+def index():
+    data = [("Data being pulled from NoSQL database!"),
+            ("MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.")]
+    return render_template('home/index.html', segment='index', data=data)
 
 
-@blueprint.route('/<template>')
+@mysqlbp.route('/<template>')
 @login_required
 def route_template(template):
 
@@ -66,7 +75,51 @@ def route_template(template):
         return render_template('home/page-500.html'), 500
 
 
-@blueprint.route('/updateprofile', methods=['GET', 'POST'])
+@nosqlbp.route('/<template>')
+@login_required
+def route_template(template):
+
+    try:
+
+        if not template.endswith('.html'):
+            template += '.html'
+
+        if template == "profile.html":
+            data = queryingOn(method="SELECT", table_name="user", filterBy=[
+                              'username'], filterVal=[str(current_user)])[0]
+
+        if template == "recipes.html":
+            data = [("dummy data")]
+
+        if template == "inventory.html":
+            data = [("dummy data")]
+
+        if template == "pricechecker.html":
+            data = queryingOn(method="SELECT", table_name="user")
+
+        if template == "budgeting.html":
+            data = [("dummy data")]
+
+        if template == "history.html":
+            data = [("dummy data")]
+
+        if template == "aboutus.html":
+            data = [("dumm data")]
+
+        # Detect the current page
+        segment = get_segment(request)
+
+        # Serve the file (if exists) from app/templates/home/FILE.html
+        return render_template("home/" + template, segment=segment, data=data)
+
+    except TemplateNotFound:
+        return render_template('home/page-404.html'), 404
+
+    except:
+        return render_template('home/page-500.html'), 500
+
+
+@mysqlbp.route('/updateprofile', methods=['GET', 'POST'])
 @login_required
 def saveDetails():
     print("Updating profile...")
@@ -120,7 +173,7 @@ def saveDetails():
         print("cur closed")
 
 
-@blueprint.route('/pricechecker', methods=['GET'])
+@mysqlbp.route('/pricechecker', methods=['GET'])
 @login_required
 def searchItem():
     print("Searching item...")
@@ -162,14 +215,14 @@ def get_segment(request):
         return None
 
 
-@blueprint.route('/price_checker')
+@mysqlbp.route('/price_checker')
 def price_checker():
     food_items = db.select_data(table_name="food_item")
 
     return render_template('home/pricechecker.html', food_items=food_items)
 
 
-@blueprint.route('/grocery_history', methods=['GET', 'POST'])
+@mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
 def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
@@ -209,7 +262,7 @@ def grocery_history():
         return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
 
 
-@blueprint.route('/get_purchase', methods=['POST'])
+@mysqlbp.route('/get_purchase', methods=['POST'])
 def get_purchase():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
@@ -259,7 +312,7 @@ def get_purchase():
         return render_template('home/purchase_detail.html', purchases=purchases, details=details)
 
 
-@blueprint.route('/insert_receipt', methods=["POST"])
+@mysqlbp.route('/insert_receipt', methods=["POST"])
 def insert_receipt():
     if request.method == 'POST':
         total_amt = request.form['total_amt']
@@ -280,7 +333,7 @@ def insert_receipt():
         return jsonify({'receipt_id': receipt_id})
 
 
-@blueprint.route('/insert_receipt_ingredient', methods=["POST"])
+@mysqlbp.route('/insert_receipt_ingredient', methods=["POST"])
 def insert_receipt_ingredient():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
@@ -301,7 +354,7 @@ def insert_receipt_ingredient():
         return jsonify({'response': "OK"})
     
     
-@blueprint.route('/inventory.html')
+@mysqlbp.route('/inventory.html')
 def GetPantryItems():
     sql4 = "SELECT id FROM user WHERE username= '" + str(current_user) + "'"
     mycursor4 = db.cursor(buffered=True, dictionary=True)
@@ -333,7 +386,7 @@ def GetPantryItems():
     return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
 
 
-@blueprint.route('/updatepantry', methods=['GET', 'POST'])
+@mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
 def update3():
     if request.method == "POST":
         weight = str(request.form['weight'])
@@ -361,7 +414,7 @@ def update3():
         return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
 
     
-@blueprint.route('/Createpantry', methods=['GET', 'POST'])
+@mysqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def Create():
     if request.method == "POST":
         id = "1"
@@ -395,7 +448,7 @@ def Create():
         return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
 
-@blueprint.route('/Removepantry', methods=['GET', 'POST'])
+@mysqlbp.route('/Removepantry', methods=['GET', 'POST'])
 def delete():
     if request.method == "POST":
         id = "1"

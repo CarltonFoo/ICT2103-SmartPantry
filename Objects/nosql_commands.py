@@ -15,8 +15,7 @@ NOSQL_DATABASE = environ.get("NOSQL_DATABASE")
 
 class NOSQL:
     def __init__(self) -> None:
-        self.client = MongoClient(
-            f"mongodb+srv://{NOSQL_USERNAME}:{NOSQL_PASSWORD}@cluster0.xszjw.mongodb.net/?retryWrites=true&w=majority", ssl_cert_reqs=ssl.CERT_NONE)
+        self.client = MongoClient(f"mongodb+srv://{NOSQL_USERNAME}:{NOSQL_PASSWORD}@cluster0.xszjw.mongodb.net/?retryWrites=true&w=majority", ssl_cert_reqs=ssl.CERT_NONE)
         self.db = self.client.get_database(NOSQL_DATABASE)
 
     def insert_data(self, collection: str = "user", data=None):

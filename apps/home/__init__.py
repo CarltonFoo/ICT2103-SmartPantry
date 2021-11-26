@@ -1,7 +1,13 @@
 from flask import Blueprint
 
-blueprint = Blueprint(
-    'home_blueprint',
+mysqlbp = Blueprint(
+    'mysql_blueprint',
     __name__,
-    url_prefix=''
+    url_prefix='/mysql'
+)
+
+nosqlbp = Blueprint(
+    'nosql_blueprint',
+    __name__,
+    url_prefix='/nosql'
 )
