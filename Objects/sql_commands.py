@@ -19,6 +19,7 @@ db = mysql.connector.connect(
 )
 
 cursor = db.cursor(buffered=True, dictionary=True)
+cursor2 = db.cursor()
 
 def listToStr(listOfData):
     """Convert list to a string with coma separated"""

@@ -7,9 +7,6 @@ from flask_login import (
     current_user
 )
 
-db = sql_commands.SQL_Database()
-
-
 @blueprint.route('/index')
 @login_required
 def index():
@@ -57,7 +54,7 @@ def get_segment(request):
 
 @blueprint.route('/price_checker')
 def price_checker():
-    food_items = db.select_data(table_name="food_item")
+    food_items = sql_commands.select_data(table_name="food_item")
 
     return render_template('home/pricechecker.html', food_items=food_items)
 
@@ -67,7 +64,7 @@ def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
         
-        mycursor = db.cursor
+        mycursor = sql_commands.cursor2
         sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.uid = '{}'".format(user_id)
         
         mycursor.execute(sql)
@@ -82,7 +79,7 @@ def grocery_history():
             
         return jsonify({'purchases': monthly_totals})
     else:
-        mycursor = db.cursor
+        mycursor = sql_commands.cursor2
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
 
         mycursor.execute(sql)
@@ -108,7 +105,7 @@ def get_purchase():
         receipt_id = request.form['receipt_id']
 
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
-        mycursor = db.cursor
+        mycursor = sql_commands.cursor2
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
 
@@ -164,9 +161,9 @@ def insert_receipt():
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=["uid, total_amount"], values=receipt)
+        sql_commands.insert_data(table_name="receipt", table_columns=["uid, total_amount"], values=receipt)
 
-        mycursor = db.cursor
+        mycursor = sql_commands.cursor2
         mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
         receipt_id = mycursor.fetchone()
 
@@ -189,6 +186,6 @@ def insert_receipt_ingredient():
                 date
             )
         ]
-        db.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+        sql_commands.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})

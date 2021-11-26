@@ -88,11 +88,11 @@
                                     <!-- Shows each food item as a table record -->
                                     {% for item in food_items %}
                                     <tr>
-                                        <td>{{ item[0] }}</td>
-                                        <td>{{ item[1] }} ({{ item[3] }}g)</td>
+                                        <td>{{ item["fid"] }}</td>
+                                        <td>{{ item["food_name"] }} ({{ item["weight"] }}g)</td>
                                         <td>${{ item[2] }}</td>
                                         <td>
-                                            <button type="button" data-fid="{{ item[0] }}" data-name="{{ item[1] }}" data-weight="{{ item[3] }}" data-price="{{ item[2] }}" class="btn  btn-icon btn-outline-success addBtn"><i class="feather icon-plus"></i></button>
+                                            <button type="button" data-fid="{{ item['fid'] }}" data-name="{{ item['food_name'] }}" data-weight="{{ item['weight'] }}" data-price="{{ item['price'] }}" class="btn  btn-icon btn-outline-success addBtn"><i class="feather icon-plus"></i></button>
                                         </td>
                                     </tr>
                                     {% endfor %}
