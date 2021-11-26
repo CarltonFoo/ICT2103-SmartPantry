@@ -42,6 +42,36 @@
 							</p>
 						</div>
 					</div>
+					<div class="card">
+					<div class="card-header">
+						<h5>Test Div</h5>
+					</div>
+					<div class="card-body table-border-style">
+						<div class="table-responsive">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>First Name</th>
+										<th>Last Name</th>
+										<th>Username</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for item in data %}
+									{% print(item) %}
+									<tr>
+										<td>{{item.id}}</td>
+										<td>{{item.username}}</td>
+										<td>{{item.profile_bio}}</td>
+										<td>{{item.dietary_needs}}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
 				</div>
 				<!-- [ sample-page ] end -->
 			</div>

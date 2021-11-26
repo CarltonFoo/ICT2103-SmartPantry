@@ -1,23 +1,81 @@
-from apps.home import blueprint
-from flask import render_template, request, jsonify
+from apps.home import mysqlbp, nosqlbp
+from flask import render_template, request
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from Objects import sql_commands
 from flask_login import (
-    current_user
+    current_user,
+    login_required
 )
+from Controls.queryControl import queryingOn
+from Objects.sql_commands import db
+from apps.authentication.util import hash_pass
+from apps.authentication.models import Users
 
-db = sql_commands.SQL_Database()
+from Objects.nosql_commands import NOSQL
 
+nosql = NOSQL()
 
-@blueprint.route('/index')
+@mysqlbp.route('/index')
 @login_required
 def index():
+    data = [("Data being pulled from MySQL database!"),
+            ("MySQL is an open-source relational database management system.")]
+    return render_template('home/index.html', segment='index', data=data)
 
-    return render_template('home/index.html', segment='index')
+
+@nosqlbp.route('/index')
+@login_required
+def index():
+    data = [("Data being pulled from NoSQL database!"),
+            ("MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.")]
+    return render_template('home/index.html', segment='index', data=data)
 
 
-@blueprint.route('/<template>')
+@mysqlbp.route('/<template>')
+@login_required
+def route_template(template):
+
+    try:
+
+        if not template.endswith('.html'):
+            template += '.html'
+        
+        if template == "profile.html":
+            data = queryingOn(method="SELECT", table_name="user", filterBy=['username'], filterVal=[str(current_user)])[0]
+
+        if template == "recipes.html":
+            data = [("dummy data")]
+
+        if template == "inventory.html":
+            data = [("dummy data")]
+
+        if template == "pricechecker.html":
+            data = queryingOn(method="SELECT", table_name="user")
+
+        if template == "budgeting.html":
+            data = [("dummy data")]
+
+        if template == "history.html":
+            data = [("dummy data")]
+
+        if template == "aboutus.html":
+            data = [("dummy data")]
+
+        # Detect the current page
+        segment = get_segment(request)
+
+        # Serve the file (if exists) from app/templates/home/FILE.html
+        return render_template("home/" + template, segment=segment, data=data)
+
+    except TemplateNotFound:
+        return render_template('home/page-404.html'), 404
+
+    except:
+        return render_template('home/page-500.html'), 500
+
+
+@nosqlbp.route('/<template>')
 @login_required
 def route_template(template):
 
@@ -26,17 +84,118 @@ def route_template(template):
         if not template.endswith('.html'):
             template += '.html'
 
+        if template == "profile.html":
+            data = queryingOn(method="SELECT", table_name="user", filterBy=['username'], filterVal=[str(current_user)])[0]
+
+        if template == "recipes.html":
+            data = [("dummy data")]
+
+        if template == "inventory.html":
+            data = [("dummy data")]
+
+        if template == "pricechecker.html":
+            data = queryingOn(method="SELECT", table_name="user")
+
+        if template == "budgeting.html":
+            data = [("dummy data")]
+
+        if template == "history.html":
+            data = [("dummy data")]
+
+        if template == "aboutus.html":
+            data = [("dumm data")]
+
         # Detect the current page
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, data=data)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
 
     except:
         return render_template('home/page-500.html'), 500
+
+
+@mysqlbp.route('/updateprofile', methods=['GET', 'POST'])
+@login_required
+def saveDetails():
+    print("Updating profile...")
+    try:
+        if request.method == 'POST':
+            if request.form['username']:
+                user = Users.query.filter_by(username=request.form['username']).first()
+                if not user:
+                    username = str(request.form['username'])
+                    height = str(request.form['height'])
+                    weight = str(request.form['weight'])
+                    age = str(request.form['age'])
+                    gender = str(request.form['gender'])
+                    bio = str(request.form['bio'])
+                    diet = str(request.form['diet'])
+
+                    sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + \
+                        ', gender = "' + gender + '", profile_bio = "' + bio + \
+                        '", dietary_needs = "' + diet + \
+                        '" WHERE username = "' + str(current_user)
+                    print(sql)
+
+                    if request.form['password']:
+                        password = str(request.form['password'])
+                        passhash = str(hash_pass(password)).split("'")[1]
+
+                        sql = 'UPDATE user SET username = "' + username + '", password = "' + \
+                            str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + \
+                            '", profile_bio = "' + bio + '", dietary_needs = "' + \
+                            diet + '" WHERE username = "' + str(current_user)
+
+                    mycursor = db.cursor()
+                    mycursor.execute(sql)
+                    db.commit()
+
+                    selection = "*"
+                    where = "username ='" + str(current_user) + "'"
+                    data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
+                    result = "Profile updated successfully!"
+
+                else:
+                    selection = "*"
+                    where = "username ='" + str(current_user) + "'"
+                    data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
+                    result = "Username exists"
+
+                print(result)
+                return render_template('home/profile.html', data=data)
+    finally:
+        mycursor.close()
+        print("cur closed")
+
+
+@mysqlbp.route('/pricechecker', methods=['GET'])
+@login_required
+def searchItem():
+    print("Searching item...")
+    try:
+        if request.method == 'GET':
+            input = str(request.args.get("search"))
+            sql = "SELECT * FROM user WHERE username LIKE '%" + input + "%'"
+
+            mycursor = db.cursor(buffered=True, dictionary=True)
+            mycursor.execute(sql)
+            db.commit()
+            data = mycursor.fetchall()
+            print("data", data)
+
+            if data:
+                return render_template('home/pricechecker.html', data=data)
+            else:
+                data = queryingOn(method="SELECT", selection="*", table_name="user")
+                return render_template('home/pricechecker.html', data=data)
+    finally:
+        mycursor.close()
+        print("cur closed")
+
 
 
 # Helper - Extract current page name from request
@@ -55,20 +214,20 @@ def get_segment(request):
         return None
 
 
-@blueprint.route('/price_checker')
+@mysqlbp.route('/price_checker')
 def price_checker():
     food_items = db.select_data(table_name="food_item")
 
     return render_template('home/pricechecker.html', food_items=food_items)
 
 
-@blueprint.route('/grocery_history', methods=['GET', 'POST'])
+@mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
 def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
         
         mycursor = db.cursor
-        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.uid = '{}'".format(user_id)
+        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
         
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
@@ -83,7 +242,7 @@ def grocery_history():
         return jsonify({'purchases': monthly_totals})
     else:
         mycursor = db.cursor
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(current_user.id)
 
         mycursor.execute(sql)
         purchases = mycursor.fetchall()        
@@ -102,12 +261,12 @@ def grocery_history():
         return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
 
 
-@blueprint.route('/get_purchase', methods=['POST'])
+@mysqlbp.route('/get_purchase', methods=['POST'])
 def get_purchase():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
 
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
         mycursor = db.cursor
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
@@ -152,7 +311,7 @@ def get_purchase():
         return render_template('home/purchase_detail.html', purchases=purchases, details=details)
 
 
-@blueprint.route('/insert_receipt', methods=["POST"])
+@mysqlbp.route('/insert_receipt', methods=["POST"])
 def insert_receipt():
     if request.method == 'POST':
         total_amt = request.form['total_amt']
@@ -164,7 +323,7 @@ def insert_receipt():
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=["uid, total_amount"], values=receipt)
+        db.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
         mycursor = db.cursor
         mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
@@ -173,7 +332,7 @@ def insert_receipt():
         return jsonify({'receipt_id': receipt_id})
 
 
-@blueprint.route('/insert_receipt_ingredient', methods=["POST"])
+@mysqlbp.route('/insert_receipt_ingredient', methods=["POST"])
 def insert_receipt_ingredient():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
@@ -192,3 +351,121 @@ def insert_receipt_ingredient():
         db.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})
+    
+    
+@mysqlbp.route('/inventory.html')
+def GetPantryItems():
+    sql4 = "SELECT id FROM user WHERE username= '" + str(current_user) + "'"
+    mycursor4 = db.cursor(buffered=True, dictionary=True)
+    mycursor4.execute(sql4)
+    id = mycursor4.fetchall()
+    sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(
+        current_user) + "')"
+
+    mycursor = db.cursor(buffered=True, dictionary=True)
+    mycursor.execute(sql)
+    db.commit()
+    pantry_items = mycursor.fetchall()
+    print("data", pantry_items)
+    sql2 = "SELECT SUM(weight) FROM pantry WHERE id=(SELECT id FROM user WHERE username= '" + \
+        str(current_user) + "')"
+    mycursor2 = db.cursor(buffered=True, dictionary=True)
+    mycursor2.execute(sql2)
+    pantryheaviest = mycursor2.fetchall()
+    sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+        current_user) + "'))"
+    mycursor3 = db.cursor(buffered=True, dictionary=True)
+    mycursor3.execute(sql3)
+    fooditem = mycursor3.fetchall()
+    #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+    #mycursor4 = db.cursor(buffered=True, dictionary=True)
+    #mycursor4.execute(sql4)
+    #maxfoodname= mycursor3.fetchall()
+
+    return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+
+
+@mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
+def update3():
+    if request.method == "POST":
+        weight = str(request.form['weight'])
+        fid = str(request.form['fidsss'])
+        sql = "UPDATE pantry SET weight = '" + weight + \
+            "' WHERE id = (SELECT id FROM user WHERE username= '" + \
+            str(current_user) + "') AND fid =" + str(fid)
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        data = mycursor.fetchall()
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        db.commit()
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
+
+    
+@mysqlbp.route('/Createpantry', methods=['GET', 'POST'])
+def Create():
+    if request.method == "POST":
+        id = "1"
+        weight = str(request.form['createweight'])
+        fid = str(request.form['colours'])
+
+        pantryitems = [
+            (
+                id,
+                fid,
+                weight
+            )
+        ]
+        sql = "INSERT INTO pantry (id, fid, weight) VALUES ((SELECT id FROM user WHERE username= '" + \
+            str(current_user) + "'), '" + fid + "', '" + weight + "')"
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+@mysqlbp.route('/Removepantry', methods=['GET', 'POST'])
+def delete():
+    if request.method == "POST":
+        id = "1"
+        fid = str(request.form['fidssr'])
+        sql = "DELETE FROM pantry WHERE id = (SELECT id FROM user WHERE username= '" + str(
+            current_user) + "') AND fid = '" + fid + "'"
+        mycursor = db.cursor()
+        mycursor.execute(sql)
+        db.commit()
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "')"
+        mycursor2.execute(sql2)
+        db.commit()
+        pantry_items = mycursor2.fetchall()
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
+            current_user) + "'))"
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        fooditem = mycursor3.fetchall()
+        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)

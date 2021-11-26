@@ -29,8 +29,8 @@ def concatList(list1: list = None, list2: list = None, char: str = "="):
     combine = zip(list1, list2)
     result = []
     for ele1, ele2 in combine:
-        result.append("'" + ele1 + "'" + char + "'" + ele2 + "'")
-    return result
+        result.append( ele1 + char + "'" + ele2 + "'")
+    return result[0]
 
 # class __Query:
 #     def __init__(self) -> None:
@@ -88,7 +88,7 @@ def select_data(getheaders: list = None, filterBy: list = None, filterVal: list 
     if table_name is None or table_name.isspace():
         raise ValueError(
             "Table name cannot be Null value or whitespace characters")
-
+    
     if getheaders is None and filterBy is None and filterVal is None:
         cursor.execute(f"SELECT * from {table_name}")
     else:

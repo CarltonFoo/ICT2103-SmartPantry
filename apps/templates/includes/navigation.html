@@ -4,7 +4,7 @@
 		
         <div class="m-header">
             <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
-            <a href="#!" class="b-brand">
+            <a href="index" class="b-brand">
                 <strong style="font-size: 24px"> SmartPantry </strong>
                 <!-- <img src="/static/assets/images/logo.png" alt="" class="logo">
                 <img src="/static/assets/images/logo-icon.png" alt="" class="logo-thumb"> -->
@@ -15,11 +15,18 @@
         </div>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
-                <!-- 
+                
                 <li>
-                    MySQL <-> NoSQL
+                    <div class="btn-group">
+                        <a href="/mysql/index" class="btn btn-success">
+                            MySQL 
+                        </a>
+                        <a href="/nosql/index" class="btn btn-success">
+                            NoSQL 
+                        </a>
+                    </div>
                 </li>
-                -->
+                
                 <li>
                     <div class="dropdown drp-user">
                         <a href="#!" class="dropdown-toggle" data-toggle="dropdown">
@@ -35,12 +42,12 @@
                                 <span>
                                     Logout
                                 </span>
-                                <a href="{{ url_for('authentication_blueprint.logout') }}" class="dud-logout" title="Logout">
+                                <a href="{{ url_for('authentication_mysql_blueprint.logout') }}" class="dud-logout" title="Logout">
                                     <i class="feather icon-log-out"></i>
                                 </a>
                             </div>
                             <ul class="pro-body">
-                                <li><a href="/profile.html" class="dropdown-item"><i class="feather icon-user"></i> Profile </a></li>
+                                <li><a href="profile.html" class="dropdown-item"><i class="feather icon-user"></i> Profile </a></li>
                             </ul>
                         </div>
                     </div>

@@ -1,7 +1,13 @@
 from flask import Blueprint
 
-blueprint = Blueprint(
-    'authentication_blueprint',
+mysqlbp = Blueprint(
+    'authentication_mysql_blueprint',
+    __name__,
+    url_prefix=''
+)
+
+nosqlbp = Blueprint(
+    'authentication_nosql_blueprint',
     __name__,
     url_prefix=''
 )
