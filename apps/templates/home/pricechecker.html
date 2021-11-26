@@ -1,85 +1,334 @@
-{% extends "layouts/base.html" %}
-
-{% block title %} Sample Page {% endblock %} 
+{% extends "layouts/base.html" %} {% block title %} Sample Page {% endblock %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
 
-{% block content %}	
-
-	<!-- [ Main Content ] start -->
-	<div class="pcoded-main-container">
-		<div class="pcoded-content">
-			<!-- [ breadcrumb ] start -->
-			<div class="page-header">
-				<div class="page-block">
-					<div class="row align-items-center">
-						<div class="col-md-12">
-							<div class="page-header-title">
-								<h5 class="m-b-10">Price Checker</h5>
-							</div>
-							<ul class="breadcrumb">
-								<li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
-								<li class="breadcrumb-item"><a href="#!">Price Checker</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- [ breadcrumb ] end -->
-			<!-- [ Main Content ] start -->
-			<div class="row">
-				<!-- [ sample-page ] start -->
-				<div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Search for items</h5>
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Price Checker</h5>
                         </div>
-                        <div class="card-body table-border-style">
-
-                            <form role="form" method="get" action="/pricechecker">
-                                <div class="input-group input-group-button mb-3">
-                                    <input type="text" id="searchinput" name="search" class="form-control" placeholder="Write your place">
-                                    <span class="input-group-addon" id="basic-addon1">
-                                        <button type="submit" class="btn btn-primary m-0">Search Items</button>
-                                    </span>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="#!">Price Checker</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <!-- [ Main Content ] start -->
+        <div class="row">
+            <!-- [ sample-page ] start -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Search for food</h5>
+                        <button type="button" id="viewListBtn" class="btn btn-primary float-right" data-toggle="modal" data-target="#shoppingListModal">View Shopping List</button>
+                        <div id="shoppingListModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="shoppingListModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLiveLabel">Shopping List</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Food Item</th>
+                                                        <th>Quantity</th>
+                                                        <th>Price</th>
+                                                        <th>Remove</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="shoppingList">
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td>Total Amount:</td>
+                                                        <td>$<span id="totalAmt"></span></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn  btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" id="checkoutBtn" class="btn  btn-success">Checkout</button>
+                                    </div>
                                 </div>
-                            </form>
-                            
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Username</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in data %}
-                                        <tr>
-                                            <td>{{item.id}}</td>
-                                            <td>{{item.username}}</td>
-                                            <td>{{item.password}}</td>
-                                            <td>{{item.profile_bio}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
                             </div>
-
+                        </div>
+                    </div>
+                    <div class="card-body table-border-style">
+                        <div class="input-group input-group-button mb-3">
+                            <input type="text" id="search" class="form-control" placeholder="Search for your food item">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Food Item</th>
+                                        <th>Price</th>
+                                        <th>Add</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="foodTable">
+                                    <!-- Shows each food item as a table record -->
+                                    {% for item in food_items %}
+                                    <tr>
+                                        <td>{{ item[0] }}</td>
+                                        <td>{{ item[1] }} ({{ item[3] }}g)</td>
+                                        <td>${{ item[2] }}</td>
+                                        <td>
+                                            <button type="button" data-fid="{{ item[0] }}" data-name="{{ item[1] }}" data-weight="{{ item[3] }}" data-price="{{ item[2] }}" class="btn  btn-icon btn-outline-success addBtn"><i class="feather icon-plus"></i></button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-				<!-- [ sample-page ] end -->
-			</div>
-			<!-- [ Main Content ] end -->
-		</div>
-	</div>
-	<!-- [ Main Content ] end -->
+            </div>
+            <!-- [ sample-page ] end -->
+        </div>
+        <!-- [ Main Content ] end -->
+    </div>
+</div>
+<!-- [ Main Content ] end -->
 
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script>
+    food_items = [];
+
+    $(document).ready(function() {
+        // Search function on table
+        $("#search").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#foodTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });;
+
+    // Adds food item to shopping list
+    $(".addBtn").click(function() {
+        var already_added;
+        var list_index;
+
+        // Food item object
+        var food_item = {
+            id: "",
+            fid: $(this).data('fid'),
+            food_name: $(this).data('name'),
+            weight: $(this).data('weight'),
+            price: $(this).data('price'),
+            quantity: 1,
+            total_weight: $(this).data('weight'),
+        };
+
+        // Adds shopping list to localstorage
+        if (localStorage.getItem("food_items") == null) {
+            food_items[0] = food_item;
+            localStorage.setItem("food_items", JSON.stringify(food_items));
+            food_item.id = 0;
+        } else {
+            food_items = JSON.parse(localStorage.getItem("food_items"));
+
+            food_items.forEach((element, index, array) => {
+                if (element["food_name"] == food_item.food_name) {
+                    already_added = true;
+                    list_index = index;
+                }
+            });
+
+            // Adjusts quantity of added food item
+            if (already_added) {
+                food_items[list_index].quantity += 1;
+
+                var total_weight = parseFloat(food_items[list_index].total_weight);
+                total_weight += parseFloat(food_items[list_index].weight);
+                food_items[list_index].total_weight = total_weight;
+
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+            } else {
+                food_items[food_items.length] = food_item;
+                food_items[0].id = 1;
+                food_item.id = food_items.length;
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+            }
+        }
+        alert("Item added!");
+        console.log(food_items);
+    });
+
+    // Shows shopping list items and calculates total amount
+    $("#viewListBtn").click(function() {
+        food_items = JSON.parse(localStorage.getItem("food_items"));
+
+        $("#shoppingList").empty();
+        $("#totalAmt").empty();
+
+        totalAmt = 0;
+
+        if (totalAmt == 0) {
+            $("#totalAmt").append("0");
+        }
+
+        // Loads each food item in shopping list (edit quantity + delete btn)
+        food_items.forEach(function(food_item, index) {
+            var buttons_html = "<div class='btn-group mb-2' role='group' aria-label='Basic example'> \
+                <button type='button' class='btn  btn-outline-primary addQtyBtn' data-index='" + index + "'><i class='feather icon-plus'></i></button> \
+                <button type='button' class='btn  btn-outline-primary'><span id='foodQty" + index + "'>" + food_item.quantity + "</span></button> \
+                <button type='button' class='btn  btn-outline-primary minusQtyBtn' data-index='" + index + "'><i class='feather icon-minus'></i></button></div>"
+
+            $("#shoppingList").append("<tr><td>" + food_item.food_name + " (<span id='foodWeight" + index + "'>" + food_item.weight + "</span>g) " +
+                "</td><td>" + buttons_html + "</td><td id='foodPrice" + index + "'>$" +
+                (food_item.price * food_item.quantity).toFixed(2) + "</td><td><button type='button' data-id='" + food_item.id +
+                "' class='btn btn-icon btn-outline-danger deleteBtn'><i class='feather icon-x'></i></button></td></tr>");
+
+            // Calculates total amount
+            totalAmt += food_item.price * food_item.quantity;
+        });
+
+        $("#totalAmt").empty();
+        $("#totalAmt").append(totalAmt.toFixed(2));
+
+        // Removes food item from shopping list
+        $(".deleteBtn").click(function() {
+            var id = $(this).data('id');
+            var food_index = 0;
+
+            food_items.forEach((element, index, array) => {
+                if (element["id"] == id) {
+                    food_index = index;
+                }
+            });
+
+            var currentAmt = food_items[food_index].price * food_items[food_index].quantity;
+
+            food_items.splice(food_index, 1);
+            localStorage.setItem("food_items", JSON.stringify(food_items));
+            totalAmt -= currentAmt;
+
+            $(this).closest('tr').remove();
+            $("#totalAmt").empty();
+            $("#totalAmt").append(totalAmt.toFixed(2));
+        });
+
+        // Increases quantity of food item and recalculates total amount
+        $(".addQtyBtn").click(function() {
+            var index = $(this).data('index');
+            var total_weight = parseFloat(food_items[index].total_weight);
+
+            food_items[index].quantity += 1;
+            total_weight += parseFloat(food_items[index].weight);
+            food_items[index].total_weight = total_weight;
+
+            $("#foodQty" + index).text(food_items[index].quantity);
+            // $("#foodWeight" + index).text(food_items[index].total_weight);
+            localStorage.setItem("food_items", JSON.stringify(food_items));
+
+            totalAmt += food_items[index].price;
+            $("#foodPrice" + index).text("$" + (food_items[index].quantity * food_items[index].price).toFixed(2));
+
+            $("#totalAmt").empty();
+            $("#totalAmt").append(totalAmt.toFixed(2));
+        });
+
+        // Decreases quantity of food item and recalculates total amount
+        $(".minusQtyBtn").click(function() {
+            var index = $(this).data('index');
+            var total_weight = parseFloat(food_items[index].total_weight);
+
+            if (food_items[index].quantity > 0) {
+                food_items[index].quantity -= 1;
+                total_weight -= parseFloat(food_items[index].weight);
+                food_items[index].total_weight = total_weight;
+
+                $("#foodQty" + index).text(food_items[index].quantity);
+                // $("#foodWeight" + index).text(food_items[index].total_weight);
+                localStorage.setItem("food_items", JSON.stringify(food_items));
+
+                totalAmt -= food_items[index].price;
+                $("#foodPrice" + index).text("$" + (food_items[index].quantity * food_items[index].price).toFixed(2));
+
+                $("#totalAmt").empty();
+                $("#totalAmt").append(totalAmt.toFixed(2));
+            }
+        });
+    });
+
+    // Handles shopping list checkout - Saves as receipt + receipt ingredients
+    $("#checkoutBtn").click(function() {
+        var total_amt = parseFloat($("#totalAmt").text());
+
+        if (food_items.length == 0) {
+            alert("Current shopping list is empty. Please add items before going to checkout.")
+        } else {
+            if (confirm("Are you sure you want to purchase these items?")) {
+                var receipt_id;
+                $.ajax({
+                    url: '/insert_receipt',
+                    type: 'POST',
+                    data: {
+                        "total_amt": total_amt
+                    },
+                    success: function(data) {
+                        receipt_id = data.receipt_id[0];
+
+                        addFoodItem(receipt_id);
+
+                        // Emptying the shopping list stored in localstorage
+                        food_items = [];
+                        localStorage.setItem("food_items", JSON.stringify(food_items));
+
+                        alert("Successfully checked out items.");
+                        $('#shoppingListModal').modal('hide');
+                    }
+                });
+            }
+        }
+    });
+
+    // AJAX POST request to insert each receipt ingredient into db
+    function addFoodItem(receipt_id) {
+        food_items = JSON.parse(localStorage.getItem("food_items"));
+
+        var today = new Date();
+        var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+
+        food_items.forEach(function(food_item) {
+            $.ajax({
+                url: '/insert_receipt_ingredient',
+                async: false,
+                type: 'POST',
+                data: {
+                    receipt_id: receipt_id,
+                    fid: food_item.fid,
+                    weight: food_item.total_weight,
+                    date: date
+                },
+                success: function() {
+                    console.log(food_item.food_name + " has been checked out successfully.");
+                }
+            });
+        });
+    }
+</script>
+{% endblock javascripts %}

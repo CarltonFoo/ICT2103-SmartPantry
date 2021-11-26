@@ -4,35 +4,6 @@ from apps import db, login_manager
 
 from apps.authentication.util import hash_pass
 
-class FoodItems(db.Model):
-    __tablename__ = 'food_item'
-    fid = db.Column(db.Integer, primary_key=True)
-    food_name = db.Column(db.String(255))
-    price = db.Column(db.Float)
-    weight = db.Column(db.Float)
-    calories= db.Column(db.Integer)
-class Receipts(db.Model):
-    __tablename__ = 'receipt'
-    rid =db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    type = db.Column(db.String(255))
-    calories=  db.Column(db.Integer)
-    description= db.Column(db.String(255))
-    dietary_needs= db.Column(db.String(255))
-class Receipts_Ingredient(db.Model):
-    __tablename__ = 'receipt_ingredient'
-    rid =db.Column(db.Integer, primary_key=True)
-    fid = db.Column(db.String(255))
-    weight = db.Column(db.Float)
-
-class pantry(db.Model):
-    __tablename__ = 'pantry'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fid = db.Column(db.Integer, primary_key=True)
-    weight = db.Column(db.FLOAT())
-
-
 class Users(db.Model, UserMixin):
 
     __tablename__ = 'user'
@@ -76,6 +47,3 @@ def request_loader(request):
     username = request.form.get('username')
     user = Users.query.filter_by(username=username).first()
     return user if user else None
-
-
-

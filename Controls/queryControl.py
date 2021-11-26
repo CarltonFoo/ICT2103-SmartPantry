@@ -1,9 +1,7 @@
-import Objects.sql_commands
-from Model.user import User
-from Objects.sql_commands import delete_data, insert_data, select_columns
+import Objects.sql_commands as mysql
 
 
-def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, data=None):
+def queryingOn(data=None, table_name:str=None, method:str = "SELECT", getheaders: list = None, filterBy: list = None, filterVal: list = None, identifier: str = None, identifier_value: str = None):
     if data is None and table_name is None:
         return
     elif data is None:
@@ -11,39 +9,19 @@ def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, d
 
     if method == "SELECT":
         #mySQL
-        sql_result = select_columns(selection=selection, table_name=table_name, where=data)
+        sql_result = mysql.select_data(table_name=table_name,getheaders= getheaders, filterBy= filterBy, filterVal= filterVal)
         #noSQL
         nosql_result = None
-        
-        return sql_result
-
-    # Instantiate object
-    if table_name == "USERS":
-        instance = User(data)
+        return sql_result, nosql_result
 
     if method == "INSERT":
         # mySQL
-        insert_data(table_name=table_name, data=instance.getter())
+        mysql.insert_data(table_name=table_name, table_columns= data.keys(), values = data.values())
         # noSQL
         
-        pass
     elif method == "DELETE":
-        delete_data(table_name=table_name, identifier_value=instance.getID())
-        pass
+        mysql.delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
+
     elif method == "UPDATE":
-        pass
-
-    pass
-
-
-def _select():
-    pass
-
-def _insert():
-    pass
-
-def _delete():
-    pass
-
-def _update():
-    pass
+        # mySQL
+        mysql.update_data(table_name=table_name, data=data,identifier_value=identifier_value, identifier=identifier)

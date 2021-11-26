@@ -6,7 +6,7 @@ class Config(object):
     basedir = os.path.abspath(os.path.dirname(__file__))
 
     # Set up SQL username and password
-    SQL_USERNAME = os.getenv("SQL_USERNAME")
+    SQL_USERNAME=os.getenv("SQL_USERNAME")
     SQL_PASSWORD = os.getenv("SQL_PASSWORD")
 
     # Set up the App SECRET_KEY
