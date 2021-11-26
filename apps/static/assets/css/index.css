@@ -1,6 +1,5 @@
 .row {
-    height: 16rem;
-    padding-bottom: 30px;
+    padding-bottom: 20px;
 }
 
 .order-card {
@@ -9,6 +8,10 @@
 
 .cardcontent {
     display: inline-flex;
+}
+
+.cardtext {
+    width: 75%;
 }
 
 .cardtitle {
@@ -20,6 +23,12 @@
 }
 
 .cardicon {
-    font-size: 48px !important;
     padding: 10px 0 10px 10px;
+    width: 25%;
+    right: 25px;
+    position: absolute;
+}
+
+.cardicon > i {
+    font-size: 48px !important;
 }
