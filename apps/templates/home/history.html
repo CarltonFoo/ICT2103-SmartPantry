@@ -1,7 +1,7 @@
 {% extends "layouts/base.html" %} {% block title %} Sample Page {% endblock %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+{% block stylesheets %} {% endblock stylesheets %} {% block content %}
 
 <!-- [ Main Content ] start -->
 <div class="pcoded-main-container">
@@ -51,7 +51,7 @@
                                     {% for i in range(purchases | length) %}
                                     <tr>
                                         <td>{{ purchases[i][3] }}</td>
-                                        <td>{{ purchases[i][0] }}</td>
+                                        <td>{{ all_food_list[i] }}</td>
                                         <td>${{ purchases[i][7] }}</td>
                                         <td>{{ purchases[i][5].strftime('%d %b %Y') }}</td>
                                         <td>

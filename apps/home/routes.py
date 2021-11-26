@@ -62,15 +62,44 @@ def price_checker():
     return render_template('home/pricechecker.html', food_items=food_items)
 
 
-@blueprint.route('/grocery_history')
+@blueprint.route('/grocery_history', methods=['GET', 'POST'])
 def grocery_history():
-    mycursor = db.cursor
-    sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
+    if request.method == 'POST':
+        user_id = current_user.id
+        
+        mycursor = db.cursor
+        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.uid = '{}'".format(user_id)
+        
+        mycursor.execute(sql)
+        purchases = mycursor.fetchall()
+        
+        monthly_totals = {}
+        for x, y in purchases:
+            if y in monthly_totals:
+                monthly_totals[y].append((x))
+            else:
+                monthly_totals[y] = [(x)]
+            
+        return jsonify({'purchases': monthly_totals})
+    else:
+        mycursor = db.cursor
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.uid, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.uid = '{}' GROUP BY ri.receipt_id".format(current_user.id)
 
-    mycursor.execute(sql)
-    purchases = mycursor.fetchall()
-
-    return render_template('home/history.html', purchases=purchases)
+        mycursor.execute(sql)
+        purchases = mycursor.fetchall()        
+        
+        food_list = []
+        all_food_list = []
+        for purchase in purchases:
+            food_list = purchase[0].split(",")
+            
+            if (len(food_list) > 3):
+                food_list[3] = "..."
+                        
+            all_food_list.append(", ".join(food_list[:4]))
+            
+        print(all_food_list)
+        return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
 
 
 @blueprint.route('/get_purchase', methods=['POST'])
