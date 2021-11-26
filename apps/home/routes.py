@@ -85,8 +85,7 @@ def route_template(template):
             template += '.html'
 
         if template == "profile.html":
-            data = queryingOn(method="SELECT", table_name="user", filterBy=[
-                              'username'], filterVal=[str(current_user)])[0]
+            data = queryingOn(method="SELECT", table_name="user", filterBy=['username'], filterVal=[str(current_user)])[0]
 
         if template == "recipes.html":
             data = [("dummy data")]
