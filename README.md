@@ -40,3 +40,6 @@ The .env file will have 4 variables:
 2. FLASK_ENV=development
 3. SQL_USERNAME=\<mysql username\>
 4. SQL_PASSWORD=\<mysql password\>
+5. NOSQL_USERNAME=\<nosql username\>
+6. NOSQL_PASSWORD=\<nosql password\>
+7. NOSQL_DATABASE=\<nosql database\>
