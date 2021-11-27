@@ -9,8 +9,8 @@ from apps import db, login_manager
 from apps.authentication import mysqlbp, nosqlbp
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
-
 from apps.authentication.util import verify_pass
+from Controls.queryControl import queryingNoSQL
 
 
 @mysqlbp.route('/')
@@ -67,8 +67,28 @@ def register():
 
         # else we can create the user
         user = Users(**request.form)
+       
+        # MySQL
         db.session.add(user)
         db.session.commit()
+        
+        # NoSQL
+        userdata = [{
+            "username": str(user.username),
+            "password": str(user.password),
+            "gender": str(user.gender),
+            'age': int(user.age),
+            'height': int(user.height),
+            "weight": int(user.weight),
+            "dietary_needs": str(user.dietary_needs),
+            "profile_bio": str(user.profile_bio),
+            "pantry": []
+        }]
+        print(userdata)
+        print(type(userdata))
+
+        queryingNoSQL(method="INSERT", collection='user', data=userdata)
+
 
         return render_template('accounts/register.html',
                                msg='User created please <a href="/login">login</a>',
