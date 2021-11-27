@@ -1,4 +1,5 @@
 from Model.base import Base, DataParserInterface
+import Objects.sql_commands
 
 class _Credential(DataParserInterface):
     """Class contains attribute username and password"""

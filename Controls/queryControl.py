@@ -1,6 +1,5 @@
-import Objects.sql_commands
-from Model.user import User
-from Objects.sql_commands import delete_data, insert_data, select_columns
+from Model import user
+from Objects import sql_commands
 
 
 def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, data=None):
@@ -11,11 +10,11 @@ def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, d
 
     if method == "SELECT":
         #mySQL
-        sql_result = select_columns(selection=selection, table_name=table_name, where=data)
+        # sql_result = select_columns(selection=selection, table_name=table_name, where=data)
         #noSQL
         nosql_result = None
         
-        return sql_result
+        # return sql_result
 
     # Instantiate object
     if table_name == "USERS":
@@ -23,27 +22,14 @@ def queryingOn(method: str = "SELECT", selection=None, table_name: str = None, d
 
     if method == "INSERT":
         # mySQL
-        insert_data(table_name=table_name, data=instance.getter())
+        # insert_data(table_name=table_name, data=instance.getter())
         # noSQL
         
         pass
     elif method == "DELETE":
-        delete_data(table_name=table_name, identifier_value=instance.getID())
+        # delete_data(table_name=table_name, identifier_value=instance.getID())
         pass
     elif method == "UPDATE":
         pass
 
-    pass
-
-
-def _select():
-    pass
-
-def _insert():
-    pass
-
-def _delete():
-    pass
-
-def _update():
     pass

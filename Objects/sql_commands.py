@@ -256,13 +256,13 @@ def __concatList(list1: list = None, list2: list = None, char: str = "="):
 
 # Adds foreign key "foreign_key" to table "table_name"
 # SQL = ALTER TABLE "table_name" ADD FOREIGN KEY ("foreign_key") REFERENCES "reference_table"(reference_key)
-def add_foreign_key(table_name, foreign_key, reference_table, reference_key):
-    mycursor = mydb.cursor()
-    mycursor.execute("ALTER TABLE {} ADD FOREIGN KEY ({}) REFERENCES {}({})".format(table_name, foreign_key, reference_table, reference_key))
+# def add_foreign_key(table_name, foreign_key, reference_table, reference_key):
+#     mycursor = mydb.cursor()
+#     mycursor.execute("ALTER TABLE {} ADD FOREIGN KEY ({}) REFERENCES {}({})".format(table_name, foreign_key, reference_table, reference_key))
 
-    mydb.commit()
+#     mydb.commit()
     
-    print("Foreign key constraint on {} added to {} table".format(foreign_key, table_name))
+#     print("Foreign key constraint on {} added to {} table".format(foreign_key, table_name))
 
 
 # Test Data
