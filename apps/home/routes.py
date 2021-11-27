@@ -1,5 +1,5 @@
 from apps.home import mysqlbp, nosqlbp
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from Objects import sql_commands
@@ -7,7 +7,7 @@ from flask_login import (
     current_user,
     login_required
 )
-from Controls.queryControl import queryingOn
+from Controls.queryControl import queryingMySQL, queryingNoSQL
 from Objects.sql_commands import db
 from apps.authentication.util import hash_pass
 from apps.authentication.models import Users
@@ -37,12 +37,12 @@ def index():
 def route_template(template):
 
     try:
-
         if not template.endswith('.html'):
             template += '.html'
         
         if template == "profile.html":
-            data = queryingOn(method="SELECT", table_name="user", filterBy=['username'], filterVal=[str(current_user)])[0]
+            data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+            print(data)
 
         if template == "recipes.html":
             data = [("dummy data")]
@@ -51,7 +51,7 @@ def route_template(template):
             data = [("dummy data")]
 
         if template == "pricechecker.html":
-            data = queryingOn(method="SELECT", table_name="user")
+            data = queryingMySQL(method="SELECT", table_name="user")
 
         if template == "budgeting.html":
             data = [("dummy data")]
@@ -80,12 +80,12 @@ def route_template(template):
 def route_template(template):
 
     try:
-
         if not template.endswith('.html'):
             template += '.html'
 
         if template == "profile.html":
-            data = queryingOn(method="SELECT", table_name="user", filterBy=['username'], filterVal=[str(current_user)])[0]
+            data = queryingNoSQL(method="SELECT", collection='user', type="one", filterBy=['username'], filterVal=[str(current_user)])
+            data = [data]
 
         if template == "recipes.html":
             data = [("dummy data")]
@@ -94,7 +94,7 @@ def route_template(template):
             data = [("dummy data")]
 
         if template == "pricechecker.html":
-            data = queryingOn(method="SELECT", table_name="user")
+            data = queryingNoSQL(method="SELECT", table_name="user")
 
         if template == "budgeting.html":
             data = [("dummy data")]
@@ -103,7 +103,7 @@ def route_template(template):
             data = [("dummy data")]
 
         if template == "aboutus.html":
-            data = [("dumm data")]
+            data = [("dummy data")]
 
         # Detect the current page
         segment = get_segment(request)
@@ -122,54 +122,54 @@ def route_template(template):
 @login_required
 def saveDetails():
     print("Updating profile...")
-    try:
-        if request.method == 'POST':
-            if request.form['username']:
-                user = Users.query.filter_by(username=request.form['username']).first()
-                if not user:
-                    username = str(request.form['username'])
-                    height = str(request.form['height'])
-                    weight = str(request.form['weight'])
-                    age = str(request.form['age'])
-                    gender = str(request.form['gender'])
-                    bio = str(request.form['bio'])
-                    diet = str(request.form['diet'])
+    if request.method == 'POST':
+            
+        userexist = Users.query.filter_by(username=request.form['username']).first()
 
-                    sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + \
-                        ', gender = "' + gender + '", profile_bio = "' + bio + \
-                        '", dietary_needs = "' + diet + \
-                        '" WHERE username = "' + str(current_user)
-                    print(sql)
+        username = str(request.form['username'])
+        height = str(request.form['height'])
+        weight = str(request.form['weight'])
+        age = str(request.form['age'])
+        gender = str(request.form['gender'])
+        bio = str(request.form['bio'])
+        diet = str(request.form['diet'])
+        
+        if request.form['username'] == str(current_user):
+            
+            sql = 'UPDATE user SET height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
 
-                    if request.form['password']:
-                        password = str(request.form['password'])
-                        passhash = str(hash_pass(password)).split("'")[1]
+            if request.form['password']:
+                password = str(request.form['password'])
+                passhash = str(hash_pass(password)).split("'")[1]
 
-                        sql = 'UPDATE user SET username = "' + username + '", password = "' + \
-                            str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + \
-                            '", profile_bio = "' + bio + '", dietary_needs = "' + \
-                            diet + '" WHERE username = "' + str(current_user)
+                sql = 'UPDATE user SET password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
 
-                    mycursor = db.cursor()
-                    mycursor.execute(sql)
-                    db.commit()
+            mycursor = db.cursor()
+            mycursor.execute(sql)
+            db.commit()
+            result = "Profile updated successfully!"
+            
+        elif not userexist:
 
-                    selection = "*"
-                    where = "username ='" + str(current_user) + "'"
-                    data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
-                    result = "Profile updated successfully!"
+            sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
 
-                else:
-                    selection = "*"
-                    where = "username ='" + str(current_user) + "'"
-                    data = queryingOn(method="SELECT", selection=selection, table_name="user", data=where)
-                    result = "Username exists"
+            if request.form['password']:
+                password = str(request.form['password'])
+                passhash = str(hash_pass(password)).split("'")[1]
 
-                print(result)
-                return render_template('home/profile.html', data=data)
-    finally:
-        mycursor.close()
-        print("cur closed")
+                sql = 'UPDATE user SET username = "' + username + '", password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
+
+            mycursor = db.cursor()
+            mycursor.execute(sql)
+            db.commit()
+            result = "Profile updated successfully!"
+
+        else:
+            result = "Username exists"
+    
+        print(result)
+        data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+        return render_template('home/profile.html', data=data)
 
 
 @mysqlbp.route('/pricechecker', methods=['GET'])
@@ -190,7 +190,7 @@ def searchItem():
             if data:
                 return render_template('home/pricechecker.html', data=data)
             else:
-                data = queryingOn(method="SELECT", selection="*", table_name="user")
+                data = queryingMySQL(method="SELECT", selection="*", table_name="user")
                 return render_template('home/pricechecker.html', data=data)
     finally:
         mycursor.close()

@@ -101,10 +101,10 @@ def select_data(getheaders: list = None, filterBy: list = None, filterVal: list 
             cursor.execute(f"SELECT {cols} from {table_name}")
         elif getheaders is None:
             where = concatList(filterBy, filterVal)
-            cursor.execute(
-                f"SELECT * from {table_name} WHERE {where}")
+            cursor.execute(f"SELECT * from {table_name} WHERE {where}")
 
-    return cursor.fetchall()
+    result = cursor.fetchall()
+    return result
 
 def insert_data(table_name: str = None, table_columns: list = None, values: list = None):
     columns_string = listToStr(table_columns)
@@ -301,28 +301,28 @@ def update_data(table_name: str, data: dict, identifier: str, identifier_value: 
 # print("\n")
 # delete_data("test", "id", "5")
 # delete_all("test")
-data = {
-    "food_name": "pineapple",
-    "price": 5.00,
-    "weight": 500,
-    "calories": 100
-}
+# data = {
+#     "food_name": "pineapple",
+#     "price": 5.00,
+#     "weight": 500,
+#     "calories": 100
+# }
 
-food_item_values = [
-    (
-        47,
-        "banana",
-        4.00,
-        100,
-        10
-    )
-]
+# food_item_values = [
+#     (
+#         47,
+#         "banana",
+#         4.00,
+#         100,
+#         10
+#     )
+# ]
 
-receipts = [
-    (
-        1
-    )
-]
+# receipts = [
+#     (
+#         1
+#     )
+# ]
 
 # a = SQL_Database()
 # print(select_data(table_name="food_item"))

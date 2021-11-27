@@ -19,11 +19,11 @@ class NOSQL:
         self.db = self.client.get_database(NOSQL_DATABASE)
 
     def insert_data(self, collection: str = "user", data=None):
-        dataLength = len(data)
+        dataLength = len(data[0])
         if dataLength > 1:
             return self.db[collection].insert_many(data)
         elif dataLength == 1:
-            return self.db[collection].insert_one(data)
+            return self.db[collection].insert_one(data[0])            
         else:
             raise ValueError('Missing data')
 
@@ -42,7 +42,7 @@ class NOSQL:
         if filterBy is None or filterVal is None or type == "all":
             return list(self.db[collection].find())
         elif type == 'one':
-            return self.db[collection].find_one({filterBy: filterVal})
+            return self.db[collection].find_one({filterBy[0]: filterVal[0]})
 
     def update_data(self, collection: str = None, data=None, filterBy=None, filterVal=None, type="set", field=None):
         if field is None and type == 'set':
