@@ -119,6 +119,7 @@ def route_template(template):
 
 
 @mysqlbp.route('/updateprofile', methods=['GET', 'POST'])
+@nosqlbp.route('/updateprofile', methods=['GET', 'POST'])
 @login_required
 def saveDetails():
     print("Updating profile...")
@@ -126,43 +127,43 @@ def saveDetails():
             
         userexist = Users.query.filter_by(username=request.form['username']).first()
 
-        username = str(request.form['username'])
-        height = str(request.form['height'])
-        weight = str(request.form['weight'])
-        age = str(request.form['age'])
-        gender = str(request.form['gender'])
-        bio = str(request.form['bio'])
-        diet = str(request.form['diet'])
+        data = {
+            "height": str(request.form['height']),
+            "weight": str(request.form['weight']),
+            "age": str(request.form['age']),
+            "gender": str(request.form['gender']),
+            "profile_bio": str(request.form['bio']),
+            "dietary_needs": str(request.form['diet']),
+        }
         
         if request.form['username'] == str(current_user):
-            
-            sql = 'UPDATE user SET height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
 
             if request.form['password']:
                 password = str(request.form['password'])
                 passhash = str(hash_pass(password)).split("'")[1]
 
-                sql = 'UPDATE user SET password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
+                data["password"] = passhash
 
-            mycursor = db.cursor()
-            mycursor.execute(sql)
-            db.commit()
+            queryingMySQL(method="UPDATE", table_name="user", data=data, identifier="username", identifier_value=str(current_user))
+            queryingNoSQL(method="UPDATE", collection="user", data=data, filterBy="username", filterVal=str(current_user), type="set")
             result = "Profile updated successfully!"
             
         elif not userexist:
 
-            sql = 'UPDATE user SET username = "' + username + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
+            data["username"] = str(request.form['username'])
 
             if request.form['password']:
                 password = str(request.form['password'])
                 passhash = str(hash_pass(password)).split("'")[1]
 
-                sql = 'UPDATE user SET username = "' + username + '", password = "' + str(passhash) + '", height = ' + height + ', weight = ' + weight + ', age = ' + age + ', gender = "' + gender + '", profile_bio = "' + bio + '", dietary_needs = "' + diet + '" WHERE username = "' + str(current_user)
-
-            mycursor = db.cursor()
-            mycursor.execute(sql)
-            db.commit()
+                data["password"] = passhash
+                
+            queryingMySQL(method="UPDATE", table_name="user", data=data, identifier="username", identifier_value=str(current_user))
+            queryingNoSQL(method="UPDATE", collection="user", data=data, filterBy="username", filterVal=str(current_user), type="set")
             result = "Profile updated successfully!"
+
+            data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(request.form['username'])])
+            return render_template('home/profile.html', data=data)
 
         else:
             result = "Username exists"

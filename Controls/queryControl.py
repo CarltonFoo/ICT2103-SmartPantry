@@ -31,7 +31,6 @@ def queryingNoSQL(data=None, method: str = "SELECT", filterBy: list = None, filt
     if method == "SELECT":
         #noSQL
         nosql_result = nosql.select_data(type=type, collection=collection, filterBy=filterBy, filterVal=filterVal)
-        print("nosql_result", nosql_result)
         return nosql_result
 
     if method == "INSERT":
