@@ -16,6 +16,22 @@ from Objects.nosql_commands import NOSQL
 
 nosql = NOSQL()
 
+# Helper - Extract current page name from request
+def get_segment(request):
+
+    try:
+
+        segment = request.path.split('/')[-1]
+
+        if segment == '':
+            segment = 'index'
+
+        return segment
+
+    except:
+        return None
+
+
 @mysqlbp.route('/index')
 @login_required
 def index():
@@ -49,9 +65,6 @@ def route_template(template):
 
         if template == "inventory.html":
             data = [("dummy data")]
-
-        if template == "pricechecker.html":
-            data = queryingMySQL(method="SELECT", table_name="user")
 
         if template == "budgeting.html":
             data = [("dummy data")]
@@ -92,9 +105,6 @@ def route_template(template):
 
         if template == "inventory.html":
             data = [("dummy data")]
-
-        if template == "pricechecker.html":
-            data = queryingNoSQL(method="SELECT", table_name="user")
 
         if template == "budgeting.html":
             data = [("dummy data")]
@@ -199,25 +209,17 @@ def searchItem():
 
 
 
-# Helper - Extract current page name from request
-def get_segment(request):
 
-    try:
-
-        segment = request.path.split('/')[-1]
-
-        if segment == '':
-            segment = 'index'
-
-        return segment
-
-    except:
-        return None
-
-
-@mysqlbp.route('/price_checker')
+@mysqlbp.route('/pricechecker.html')
 def price_checker():
-    food_items = db.select_data(table_name="food_item")
+    food_items = queryingMySQL(method="SELECT", table_name='food_item')
+    
+    return render_template('home/pricechecker.html', food_items=food_items)
+
+
+@nosqlbp.route('/pricechecker.html')
+def price_checker():
+    food_items = queryingNoSQL(method="SELECT", collection='food_item')
 
     return render_template('home/pricechecker.html', food_items=food_items)
 
