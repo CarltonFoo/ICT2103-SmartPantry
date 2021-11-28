@@ -14,6 +14,10 @@ from apps.authentication.models import Users
 
 from Objects.nosql_commands import NOSQL
 
+import json
+
+from flask.json import jsonify
+from flask.wrappers import Response
 nosql = NOSQL()
 
 # Helper - Extract current page name from request
@@ -183,6 +187,9 @@ def saveDetails():
         return render_template('home/profile.html', data=data)
 
 
+        
+    
+
 @mysqlbp.route('/pricechecker', methods=['GET'])
 @login_required
 def searchItem():
@@ -207,6 +214,21 @@ def searchItem():
         mycursor.close()
         print("cur closed")
 
+@nosqlbp.route('/pricechecker', methods=['GET'])
+@login_required
+def noSQLsearchItems():
+    print("Searching item...")
+    try:
+        input = str(request.args.get("search"))
+        food_collection = nosql.db.food_item
+        food_list = list(food_collection.find({'name':{'$regex': input, '$options':'i'}}))
+        for food in food_list:
+            food['_id'] = str(food["_id"])
+        data =  jsonify(food_list)
+        return render_template('home/pricechecker.html',data=data)
+    except Exception as ex:
+        print(ex)
+
 
 
 
@@ -222,6 +244,12 @@ def price_checker():
     food_items = queryingNoSQL(method="SELECT", collection='food_item')
 
     return render_template('home/pricechecker.html', food_items=food_items)
+@nosqlbp.route('/price_checker')
+def price_chcker():
+    data_list = nosql.select_data("all","food_item")
+    for data in data_list:
+        data["_id"] = str(data["_id"])
+    return jsonify(data_list)
 
 
 @mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
