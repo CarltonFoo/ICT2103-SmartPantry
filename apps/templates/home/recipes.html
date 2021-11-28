@@ -60,6 +60,7 @@
 <script>
     $(".viewDetails").click(function() {
         var recipe_id = $(this).data('id');
+
         $.ajax({
             url: 'get_recipe',
             type: 'POST',

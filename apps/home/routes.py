@@ -18,10 +18,13 @@ import json
 
 from flask.json import jsonify
 from flask.wrappers import Response
+
 nosql = NOSQL()
 mysql = sql_commands
 
 # Helper - Extract current page name from request
+
+
 def get_segment(request):
 
     try:
@@ -60,7 +63,7 @@ def route_template(template):
     try:
         if not template.endswith('.html'):
             template += '.html'
-        
+
         if template == "profile.html":
             data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(current_user)])
             print(data)
@@ -102,7 +105,8 @@ def route_template(template):
             template += '.html'
 
         if template == "profile.html":
-            data = queryingNoSQL(method="SELECT", collection='user', type="one", filterBy=['username'], filterVal=[str(current_user)])
+            data = queryingNoSQL(method="SELECT", collection='user', type="one", filterBy=[
+                                 'username'], filterVal=[str(current_user)])
             data = [data]
 
         if template == "recipes.html":
@@ -145,8 +149,9 @@ def route_template(template):
 def saveDetails():
     print("Updating profile...")
     if request.method == 'POST':
-            
-        userexist = Users.query.filter_by(username=request.form['username']).first()
+
+        userexist = Users.query.filter_by(
+            username=request.form['username']).first()
 
         data = {
             "height": str(request.form['height']),
@@ -156,7 +161,7 @@ def saveDetails():
             "profile_bio": str(request.form['bio']),
             "dietary_needs": str(request.form['diet']),
         }
-        
+
         if request.form['username'] == str(current_user):
 
             if request.form['password']:
@@ -165,10 +170,12 @@ def saveDetails():
 
                 data["password"] = passhash
 
-            queryingMySQL(method="UPDATE", table_name="user", data=data, identifier="username", identifier_value=str(current_user))
-            queryingNoSQL(method="UPDATE", collection="user", data=data, filterBy="username", filterVal=str(current_user), type="set")
+            queryingMySQL(method="UPDATE", table_name="user", data=data,
+                          identifier="username", identifier_value=str(current_user))
+            queryingNoSQL(method="UPDATE", collection="user", data=data,
+                          filterBy="username", filterVal=str(current_user), type="set")
             result = "Profile updated successfully!"
-            
+
         elif not userexist:
 
             data["username"] = str(request.form['username'])
@@ -178,24 +185,25 @@ def saveDetails():
                 passhash = str(hash_pass(password)).split("'")[1]
 
                 data["password"] = passhash
-                
-            queryingMySQL(method="UPDATE", table_name="user", data=data, identifier="username", identifier_value=str(current_user))
-            queryingNoSQL(method="UPDATE", collection="user", data=data, filterBy="username", filterVal=str(current_user), type="set")
+
+            queryingMySQL(method="UPDATE", table_name="user", data=data,
+                          identifier="username", identifier_value=str(current_user))
+            queryingNoSQL(method="UPDATE", collection="user", data=data,
+                          filterBy="username", filterVal=str(current_user), type="set")
             result = "Profile updated successfully!"
 
-            data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(request.form['username'])])
+            data = queryingMySQL(method="SELECT", table_name='user', filterBy=[
+                                 'username'], filterVal=[str(request.form['username'])])
             return render_template('home/profile.html', data=data)
 
         else:
             result = "Username exists"
-    
+
         print(result)
-        data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+        data = queryingMySQL(method="SELECT", table_name='user', filterBy=[
+                             'username'], filterVal=[str(current_user)])
         return render_template('home/profile.html', data=data)
 
-
-        
-    
 
 @mysqlbp.route('/pricechecker', methods=['GET'])
 @login_required
@@ -215,11 +223,13 @@ def searchItem():
             if data:
                 return render_template('home/pricechecker.html', data=data)
             else:
-                data = queryingMySQL(method="SELECT", selection="*", table_name="user")
+                data = queryingMySQL(
+                    method="SELECT", selection="*", table_name="user")
                 return render_template('home/pricechecker.html', data=data)
     finally:
         mycursor.close()
         print("cur closed")
+
 
 @nosqlbp.route('/pricechecker', methods=['GET'])
 @login_required
@@ -228,22 +238,28 @@ def noSQLsearchItems():
     try:
         input = str(request.args.get("search"))
         food_collection = nosql.db.food_item
-        food_list = list(food_collection.find({'name':{'$regex': input, '$options':'i'}}))
+        food_list = list(food_collection.find({'name': {'$regex': input, '$options': 'i'}}))
         for food in food_list:
             food['_id'] = str(food["_id"])
-        data =  jsonify(food_list)
-        return render_template('home/pricechecker.html',data=data)
+        data = jsonify(food_list)
+        return render_template('home/pricechecker.html', data=data)
     except Exception as ex:
         print(ex)
 
+
+@nosqlbp.route('/price_checker')
+def price_chcker():
+    data_list = nosql.select_data("all", "food_item")
+    for data in data_list:
+        data["_id"] = str(data["_id"])
+    return jsonify(data_list)
 
 
 @mysqlbp.route('/pricechecker.html')
 def price_checker():
     food_items = queryingMySQL(method="SELECT", table_name='food_item')
-    
-    return render_template('home/pricechecker.html', food_items=food_items)
 
+    return render_template('home/pricechecker.html', food_items=food_items)
 
 
 @nosqlbp.route('/pricechecker.html')
@@ -251,32 +267,26 @@ def price_checker():
     food_items = queryingNoSQL(method="SELECT", collection='food_item')
 
     return render_template('home/pricechecker.html', food_items=food_items)
-@nosqlbp.route('/price_checker')
-def price_chcker():
-    data_list = nosql.select_data("all","food_item")
-    for data in data_list:
-        data["_id"] = str(data["_id"])
-    return jsonify(data_list)
 
 
 @mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
 def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
-        
+
         mycursor = mysql.cursor2
         sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
-        
+
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
-        
+
         monthly_totals = {}
         for x, y in purchases:
             if y in monthly_totals:
                 monthly_totals[y].append((x))
             else:
                 monthly_totals[y] = [(x)]
-            
+
         return jsonify({'purchases': monthly_totals})
     else:
         user_id = current_user.id
@@ -285,18 +295,18 @@ def grocery_history():
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(user_id)
 
         mycursor.execute(sql)
-        purchases = mycursor.fetchall()        
-        
+        purchases = mycursor.fetchall()
+
         food_list = []
         all_food_list = []
         for purchase in purchases:
             food_list = purchase[0].split(",")
-            
+
             if (len(food_list) > 3):
                 food_list[3] = "..."
-                        
+
             all_food_list.append(", ".join(food_list[:4]))
-            
+
         return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
 
 
@@ -307,11 +317,12 @@ def get_purchase():
 
         mycursor = mysql.cursor2
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
-        
+
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
 
-        details = {"food_items": [], "food_quantity": [], "original_weight": []}
+        details = {"food_items": [],
+                   "food_quantity": [], "original_weight": []}
 
         food_list = []
         price_list = []
@@ -355,7 +366,7 @@ def get_purchase():
 def insert_receipt():
     if request.method == 'POST':
         total_amt = request.form['total_amt']
-        
+
         receipt = [
             (
                 current_user.id,
@@ -366,10 +377,12 @@ def insert_receipt():
         mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
         mycursor = mysql.cursor2
-        mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+        mycursor.execute(
+            "SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
         receipt_id = mycursor.fetchone()
 
         return jsonify({'receipt_id': receipt_id})
+
 
 @nosqlbp.route('/insert_receipt', methods=['POST'])
 def nosql_insert_receipt():
@@ -378,7 +391,7 @@ def nosql_insert_receipt():
         recipe_collection.rename('recipe')
         return "OK"
     except Exception as ex:
-        print(ex) 
+        print(ex)
         return "NO"
 
 
@@ -401,12 +414,19 @@ def insert_receipt_ingredient():
         mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})
-    
-    
+
+
 @mysqlbp.route('/recipes')
 def recipes():
     recipes = queryingMySQL(method="SELECT", table_name='recipe')
-    
+
+    return render_template('home/recipes.html', recipes=recipes)
+
+
+@nosqlbp.route('/recipes')
+def recipes():
+    recipes = queryingNoSQL(method="SELECT", collection='recipe')
+
     return render_template('home/recipes.html', recipes=recipes)
 
 
@@ -414,10 +434,11 @@ def recipes():
 def get_recipe():
     if request.method == 'POST':
         recipe_id = request.form['recipe_id']
+        
         recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
         marinates_list = recipes[0]["marinates"].split(", ")
 
-        return render_template('home/recipe_detail.html', recipes=recipes, marinates_list=marinates_list)
+        return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
 
 
 @nosqlbp.route('/get_recipe', methods=['POST'])
@@ -425,28 +446,19 @@ def get_recipe():
     if request.method == 'POST':
         recipe_id = request.form['recipe_id']
 
-        recipes = queryingNoSQL(method="SELECT", collection="recipe", type="one", filterBy=["rid"], filterVal=[str(recipe_id)])
-        # marinates_list = recipes[0]["marinates"].split(", ")
-        print(recipes)
+        recipes = queryingNoSQL(method="SELECT", type="one", collection="recipe", filterBy=["rid"], filterVal=[int(recipe_id)])   
+        marinates_list = recipes["marinates"].split(", ")
 
-        return render_template('home/recipe_detail.html')
-    
+        return render_template('home/recipe_detail.html', recipes=recipes, marinates_list=marinates_list, type="nosql")
 
-@nosqlbp.route('/recipes')
-def recipes():
-    recipes = queryingNoSQL(method="SELECT", collection='recipe')
 
-    return render_template('home/recipes.html', recipes=recipes)
-    
-    
 @mysqlbp.route('/inventory.html')
 def GetPantryItems():
     sql4 = "SELECT id FROM user WHERE username= '" + str(current_user) + "'"
     mycursor4 = db.cursor(buffered=True, dictionary=True)
     mycursor4.execute(sql4)
     id = mycursor4.fetchall()
-    sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(
-        current_user) + "')"
+    sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(current_user) + "')"
 
     mycursor = db.cursor(buffered=True, dictionary=True)
     mycursor.execute(sql)
@@ -458,17 +470,17 @@ def GetPantryItems():
     mycursor2 = db.cursor(buffered=True, dictionary=True)
     mycursor2.execute(sql2)
     pantryheaviest = mycursor2.fetchall()
-    sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
-        current_user) + "'))"
+    sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
     mycursor3 = db.cursor(buffered=True, dictionary=True)
     mycursor3.execute(sql3)
     fooditem = mycursor3.fetchall()
     #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
     #mycursor4 = db.cursor(buffered=True, dictionary=True)
-    #mycursor4.execute(sql4)
+    # mycursor4.execute(sql4)
     #maxfoodname= mycursor3.fetchall()
 
     return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+
 
 @mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
 def update3():
@@ -482,21 +494,21 @@ def update3():
         mycursor.execute(sql)
         db.commit()
         data = mycursor.fetchall()
-        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "')"
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
 
         mycursor2 = db.cursor(buffered=True, dictionary=True)
         mycursor2.execute(sql2)
         db.commit()
         pantry_items = mycursor2.fetchall()
-        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "'))"
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
         mycursor3 = db.cursor(buffered=True, dictionary=True)
         mycursor3.execute(sql3)
         db.commit()
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
-@nosqlbp.route('/updatepantry', methods=['GET','POST'])
+
+
+@nosqlbp.route('/updatepantry', methods=['GET', 'POST'])
 def noSQL_update_pantry():
     try:
         if request.method == 'POST':
@@ -504,26 +516,27 @@ def noSQL_update_pantry():
             fid = str(request.form['fidsss'])
             user_collection = nosql.db.user
             user_collection.update(
-                {"username":str(current_user),"pantry.fid":int(fid)},
+                {"username": str(current_user), "pantry.fid": int(fid)},
                 {
-                    "$set":{
+                    "$set": {
                         "pantry.$.weight": weight
                     }
                 }
             )
-        return Response(    
-                    response=json.dumps({"message":"user updated"}),
-                    status=200,
-                    mimetype="application/json"
-                )
+        return Response(
+            response=json.dumps({"message": "user updated"}),
+            status=200,
+            mimetype="application/json"
+        )
     except Exception as ex:
         print(ex)
-        Response(    
-                    response=json.dumps({"message":"user cant update"}),
-                    status=500,
-                    mimetype="application/json"
-                )
-    
+        Response(
+            response=json.dumps({"message": "user cant update"}),
+            status=500,
+            mimetype="application/json"
+        )
+
+
 @mysqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def Create():
     if request.method == "POST":
@@ -543,21 +556,20 @@ def Create():
         mycursor = db.cursor()
         mycursor.execute(sql)
         db.commit()
-        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "')"
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
 
         mycursor2 = db.cursor(buffered=True, dictionary=True)
         mycursor2.execute(sql2)
         db.commit()
         pantry_items = mycursor2.fetchall()
-        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "'))"
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
         mycursor3 = db.cursor(buffered=True, dictionary=True)
         mycursor3.execute(sql3)
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
-@nosqlbp.route('/Createpantry', methods=['GET','POST'])
+
+@nosqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def noSQL_Create():
     try:
         exists = False
@@ -567,7 +579,7 @@ def noSQL_Create():
             food_collection = nosql.db.food_item
             # Check if food item already exists in pantry
             user_collection = nosql.db.user
-            data = user_collection.find_one({'username':str(current_user)})
+            data = user_collection.find_one({'username': str(current_user)})
             data["_id"] = str(data["_id"])
             pantry_arr = data['pantry']
             fid_list = []
@@ -576,16 +588,16 @@ def noSQL_Create():
                 if i['fid'] == fid:
                     exists = True
             if exists:
-                 user_collection.update(
-                {"username":str(current_user),"pantry.fid":int(fid)},
-                {
-                    "$inc":{
-                        "pantry.$.weight": weight
+                user_collection.update(
+                    {"username": str(current_user), "pantry.fid": int(fid)},
+                    {
+                        "$inc": {
+                            "pantry.$.weight": weight
+                        }
                     }
-                }
-            )
+                )
             else:
-                food = food_collection.find_one({'fid':int(fid)})
+                food = food_collection.find_one({'fid': int(fid)})
                 food["weight"] = weight
                 inserted_item = {
                     'fid': food["fid"],
@@ -593,26 +605,26 @@ def noSQL_Create():
                     'weight': food['weight']
                 }
 
-                queryingNoSQL(method="UPDATE",collection="user",type="push",filterBy="username",filterVal=str(current_user),data=inserted_item,field="pantry")
+                queryingNoSQL(method="UPDATE", collection="user", type="push", filterBy="username", filterVal=str(current_user), data=inserted_item, field="pantry")
             user_collection = nosql.db.user
-            data = user_collection.find_one({'username':str(current_user)})
+            data = user_collection.find_one({'username': str(current_user)})
             data["_id"] = str(data["_id"])
             pantry_items = data["pantry"]
-            food_list= food_collection.find({},{'fid':1,'_id':0})
+            food_list = food_collection.find({}, {'fid': 1, '_id': 0})
             food_list2 = []
             for f in list(food_list):
                 food_list2.append(f['fid'])
             fooditem = list(set(food_list2)-set(fid_list))
 
-            return render_template("home/inventory.html",pantry_items=pantry_items, fooditem=fooditem)
+            return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
     except Exception as ex:
         print(ex)
-        Response(    
-                    response=json.dumps({"message":"user cant update"}),
-                    status=500,
-                    mimetype="application/json"
-                )
+        Response(
+            response=json.dumps({"message": "user cant update"}),
+            status=500,
+            mimetype="application/json"
+        )
 
 
 @mysqlbp.route('/Removepantry', methods=['GET', 'POST'])
@@ -626,37 +638,36 @@ def delete():
         mycursor.execute(sql)
         db.commit()
         mycursor2 = db.cursor(buffered=True, dictionary=True)
-        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "')"
+        sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
         mycursor2.execute(sql2)
         db.commit()
         pantry_items = mycursor2.fetchall()
-        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(
-            current_user) + "'))"
+        sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
         mycursor3 = db.cursor(buffered=True, dictionary=True)
         mycursor3.execute(sql3)
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
-@nosqlbp.route('/Removepantry', methods=['GET','POST'])
+
+@nosqlbp.route('/Removepantry', methods=['GET', 'POST'])
 def noSQL_delete():
     if request.method == "POST":
         fid = int(request.form['fidssr'])
         food_collection = nosql.db.food_item
         user_collection = nosql.db.user
-        user_collection.update({'username':str(current_user)},{'$pull':{"pantry":{"fid":fid}}})
-        data = user_collection.find_one({'username':str(current_user)})
+        user_collection.update({'username': str(current_user)}, {
+                               '$pull': {"pantry": {"fid": fid}}})
+        data = user_collection.find_one({'username': str(current_user)})
         data["_id"] = str(data["_id"])
         pantry_items = data["pantry"]
         fid_list = []
         for i in pantry_items:
             fid_list.append(i['fid'])
-        food_list= food_collection.find({},{'fid':1,'_id':0})
+        food_list = food_collection.find({}, {'fid': 1, '_id': 0})
         food_list2 = []
         #fooditem = list(set(food_list)-set(fid_list))
         for f in list(food_list):
             food_list2.append(f['fid'])
         fooditem = list(set(food_list2)-set(fid_list))
-        
 
     return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
