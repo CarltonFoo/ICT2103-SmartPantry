@@ -108,8 +108,14 @@ def route_template(template):
             data = [("dummy data")]
 
         if template == "inventory.html":
+            '''
+            data = queryingNoSQL(method="SELECT", collection='user', type='one', filterBy=['username'], filterVal=[str(current_user)])
+            data['_id'] = str(data['_id'])
+            data = jsonify(data)
+            data = data.pantry
             data = [("dummy data")]
-
+            '''
+            data = [("dummy data")]
         if template == "budgeting.html":
             data = [("dummy data")]
 
@@ -362,6 +368,16 @@ def insert_receipt():
 
         return jsonify({'receipt_id': receipt_id})
 
+@nosqlbp.route('/insert_receipt', methods=['POST'])
+def nosql_insert_receipt():
+    try:
+        recipe_collection = nosql.db.recipe
+        recipe_collection.rename('recipe')
+        return "OK"
+    except Exception as ex:
+        print(ex) 
+        return "NO"
+
 
 @mysqlbp.route('/insert_receipt_ingredient', methods=["POST"])
 def insert_receipt_ingredient():
@@ -415,7 +431,6 @@ def GetPantryItems():
 
     return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
 
-
 @mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
 def update3():
     if request.method == "POST":
@@ -442,7 +457,33 @@ def update3():
         db.commit()
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
-
+@nosqlbp.route('/updatepantry', methods=['GET','POST'])
+def noSQL_update_pantry():
+    try:
+        if request.method == 'POST':
+            weight = str(request.form['weight'])
+            fid = str(request.form['fidsss'])
+            user_collection = nosql.db.user
+            user_collection.update(
+                {"username":str(current_user),"pantry.fid":int(fid)},
+                {
+                    "$set":{
+                        "pantry.$.weight": weight
+                    }
+                }
+            )
+        return Response(    
+                    response=json.dumps({"message":"user updated"}),
+                    status=200,
+                    mimetype="application/json"
+                )
+    except Exception as ex:
+        print(ex)
+        Response(    
+                    response=json.dumps({"message":"user cant update"}),
+                    status=500,
+                    mimetype="application/json"
+                )
     
 @mysqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def Create():
@@ -477,6 +518,63 @@ def Create():
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
+@nosqlbp.route('/Createpantry', methods=['GET','POST'])
+def noSQL_Create():
+    try:
+        exists = False
+        if request.method == "POST":
+            weight = float(request.form['createweight'])
+            fid = int(request.form['colours'])
+            food_collection = nosql.db.food_item
+            # Check if food item already exists in pantry
+            user_collection = nosql.db.user
+            data = user_collection.find_one({'username':str(current_user)})
+            data["_id"] = str(data["_id"])
+            pantry_arr = data['pantry']
+            fid_list = []
+            for i in pantry_arr:
+                fid_list.append(i['fid'])
+                if i['fid'] == fid:
+                    exists = True
+            if exists:
+                 user_collection.update(
+                {"username":str(current_user),"pantry.fid":int(fid)},
+                {
+                    "$inc":{
+                        "pantry.$.weight": weight
+                    }
+                }
+            )
+            else:
+                food = food_collection.find_one({'fid':int(fid)})
+                food["weight"] = weight
+                inserted_item = {
+                    'fid': food["fid"],
+                    'food_name': food['food_name'],
+                    'weight': food['weight']
+                }
+
+                queryingNoSQL(method="UPDATE",collection="user",type="push",filterBy="username",filterVal=str(current_user),data=inserted_item,field="pantry")
+            user_collection = nosql.db.user
+            data = user_collection.find_one({'username':str(current_user)})
+            data["_id"] = str(data["_id"])
+            pantry_items = data["pantry"]
+            food_list= food_collection.find({},{'fid':1,'_id':0})
+            food_list2 = []
+            for f in list(food_list):
+                food_list2.append(f['fid'])
+            fooditem = list(set(food_list2)-set(fid_list))
+
+            return render_template("home/inventory.html",pantry_items=pantry_items, fooditem=fooditem)
+
+    except Exception as ex:
+        print(ex)
+        Response(    
+                    response=json.dumps({"message":"user cant update"}),
+                    status=500,
+                    mimetype="application/json"
+                )
+
 
 @mysqlbp.route('/Removepantry', methods=['GET', 'POST'])
 def delete():
@@ -500,3 +598,26 @@ def delete():
         mycursor3.execute(sql3)
         fooditem = mycursor3.fetchall()
         return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+@nosqlbp.route('/Removepantry', methods=['GET','POST'])
+def noSQL_delete():
+    if request.method == "POST":
+        fid = int(request.form['fidssr'])
+        food_collection = nosql.db.food_item
+        user_collection = nosql.db.user
+        user_collection.update({'username':str(current_user)},{'$pull':{"pantry":{"fid":fid}}})
+        data = user_collection.find_one({'username':str(current_user)})
+        data["_id"] = str(data["_id"])
+        pantry_items = data["pantry"]
+        fid_list = []
+        for i in pantry_items:
+            fid_list.append(i['fid'])
+        food_list= food_collection.find({},{'fid':1,'_id':0})
+        food_list2 = []
+        #fooditem = list(set(food_list)-set(fid_list))
+        for f in list(food_list):
+            food_list2.append(f['fid'])
+        fooditem = list(set(food_list2)-set(fid_list))
+        
+
+    return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
