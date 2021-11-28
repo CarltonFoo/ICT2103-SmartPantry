@@ -1,0 +1,43 @@
+<!-- Shows purchase details -->
+{% for recipe in recipes %}
+<div class="modal-header">
+    <h5 class="modal-title">{{ recipe["recipe_name"] }}</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+</div>
+<div class="modal-body">
+    <div class="table-responsive">
+        <table class="table table-borderless">
+            <tbody>
+                <tr>
+                    <td><strong>Cuisine</strong></td>
+                    <td> </td>
+                    <td>{{ recipe["dietary_type"] }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Calories</strong></td>
+                    <td> </td>
+                    <td>{{ recipe["calories"] }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Ingredients</strong></td>
+                    <td> </td>
+                    <td>{{ recipe["main_ingredients"] }}</td>
+                </tr>
+
+                <tr>
+                    <td><strong>Marinate & Side Ingredients</strong></td>
+                    <td> </td>
+                    <td>{% for item in marinates_list %} {{ item }} <br>{% endfor %}</td>
+                </tr>
+                <tr>
+                    <td><strong>Steps</strong></td>
+                    <td> </td>
+                    <td>
+                        <a href='{{ recipe["steps"] }}'>{{ recipe["steps"] }}</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}

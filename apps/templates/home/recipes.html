@@ -1,77 +1,76 @@
-{% extends "layouts/base.html" %}
-
-{% block title %} Sample Page {% endblock %} 
+{% extends "layouts/base.html" %} {% block title %} Sample Page {% endblock %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
 
-{% block content %}	
-
-	<!-- [ Main Content ] start -->
-	<div class="pcoded-main-container">
-		<div class="pcoded-content">
-			<!-- [ breadcrumb ] start -->
-			<div class="page-header">
-				<div class="page-block">
-					<div class="row align-items-center">
-						<div class="col-md-12">
-							<div class="page-header-title">
-								<h5 class="m-b-10">Recipes</h5>
-							</div>
-							<ul class="breadcrumb">
-								<li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
-								<li class="breadcrumb-item"><a href="#!">Recipes</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- [ breadcrumb ] end -->
-			<!-- [ Main Content ] start -->
-			<div class="row">
-				<!-- [ sample-page ] start -->
-				<div class="col-xl-12">
-					<div class="card-deck">
-						<div class="card">
-							<img class="img-fluid card-img-top" src="/static/assets/images/slider/img-slide-2.jpg" alt="Card image cap">
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-							</div>
-							<div class="card-footer">
-								<small class="text-muted">Last updated 3 mins ago</small>
-							</div>
-						</div>
-						<div class="card">
-							<img class="img-fluid card-img-top" src="/static/assets/images/slider/img-slide-1.jpg" alt="Card image cap">
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This card has supporting text below as a natural lead-in to additional content.</p>
-							</div>
-							<div class="card-footer">
-								<small class="text-muted">Last updated 3 mins ago</small>
-							</div>
-						</div>
-						<div class="card">
-							<img class="img-fluid card-img-top" src="/static/assets/images/slider/img-slide-4.jpg" alt="Card image cap">
-							<div class="card-body">
-								<h5 class="card-title">Card title</h5>
-								<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This card has even longer content than the first to show that equal height action.</p>
-							</div>
-							<div class="card-footer">
-								<small class="text-muted">Last updated 3 mins ago</small>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- [ sample-page ] end -->
-			</div>
-			<!-- [ Main Content ] end -->
-		</div>
-	</div>
-	<!-- [ Main Content ] end -->
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Recipes</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="#!">Recipes</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <!-- [ Main Content ] start -->
+        <div class="row">
+            <!-- [ sample-page ] start -->
+            {% for recipe in recipes %}
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" style="display: inline;">{{ recipe["recipe_name"] }}</h5>
+                        {% if recipe["dietary_type"] == "Chinese Food" %}
+                        <img class="float-right m-t-10" style="display: inline;" src="../static/assets/images/recipe/chinese.png" width="50px"> {% elif recipe["dietary_type"] == "Indian Food" %}
+                        <img class="float-right m-t-10" style="display: inline;" src="../static/assets/images/recipe/indian.png" width="50px"> {% elif recipe["dietary_type"] == "Malay Food" %}
+                        <img class="float-right m-t-10" style="display: inline;" src="../static/assets/images/recipe/malay.png" width="50px"> {% endif %}
+                        <a href="#!" style="display:block;" class="card-link m-t-20 viewDetails" data-id="{{ recipe['rid'] }}">View Recipe</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div id="recipeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="recipeModal" style="display: none;" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                    </div>
+                </div>
+            </div>
+            <!-- [ sample-page ] end -->
+        </div>
+        <!-- [ Main Content ] end -->
+    </div>
+</div>
+<!-- [ Main Content ] end -->
 
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+<script>
+    $(".viewDetails").click(function() {
+        var recipe_id = $(this).data('id');
+        $.ajax({
+            url: 'get_recipe',
+            type: 'POST',
+            data: {
+                recipe_id: recipe_id
+            },
+            success: function(data) {
+                $('.modal-content').html(data);
+                $('#recipeModal').modal('show');
+            }
+        });
+    });
+</script>
+{% endblock javascripts %}

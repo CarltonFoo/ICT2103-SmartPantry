@@ -15,6 +15,7 @@ from apps.authentication.models import Users
 from Objects.nosql_commands import NOSQL
 
 nosql = NOSQL()
+mysql = sql_commands
 
 # Helper - Extract current page name from request
 def get_segment(request):
@@ -79,7 +80,7 @@ def route_template(template):
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment, data=data)
+        return render_template("home/" + template, segment=segment)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
@@ -119,7 +120,7 @@ def route_template(template):
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment, data=data)
+        return render_template("home/" + template, segment=segment)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
@@ -209,12 +210,12 @@ def searchItem():
 
 
 
-
 @mysqlbp.route('/pricechecker.html')
 def price_checker():
     food_items = queryingMySQL(method="SELECT", table_name='food_item')
     
     return render_template('home/pricechecker.html', food_items=food_items)
+
 
 
 @nosqlbp.route('/pricechecker.html')
@@ -229,7 +230,7 @@ def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
         
-        mycursor = db.cursor
+        mycursor = mysql.cursor2
         sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
         
         mycursor.execute(sql)
@@ -244,8 +245,10 @@ def grocery_history():
             
         return jsonify({'purchases': monthly_totals})
     else:
-        mycursor = db.cursor
-        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(current_user.id)
+        user_id = current_user.id
+
+        mycursor = mysql.cursor2
+        sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(user_id)
 
         mycursor.execute(sql)
         purchases = mycursor.fetchall()        
@@ -260,7 +263,6 @@ def grocery_history():
                         
             all_food_list.append(", ".join(food_list[:4]))
             
-        print(all_food_list)
         return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
 
 
@@ -269,8 +271,9 @@ def get_purchase():
     if request.method == 'POST':
         receipt_id = request.form['receipt_id']
 
+        mycursor = mysql.cursor2
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
-        mycursor = db.cursor
+        
         mycursor.execute(sql)
         purchases = mycursor.fetchall()
 
@@ -326,9 +329,9 @@ def insert_receipt():
             )
         ]
 
-        db.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
+        mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
-        mycursor = db.cursor
+        mycursor = mysql.cursor2
         mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
         receipt_id = mycursor.fetchone()
 
@@ -351,9 +354,45 @@ def insert_receipt_ingredient():
                 date
             )
         ]
-        db.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+        mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})
+    
+    
+@mysqlbp.route('/recipes')
+def recipes():
+    recipes = queryingMySQL(method="SELECT", table_name='recipe')
+    
+    return render_template('home/recipes.html', recipes=recipes)
+
+
+@mysqlbp.route('/get_recipe', methods=['POST'])
+def get_recipe():
+    if request.method == 'POST':
+        recipe_id = request.form['recipe_id']
+        recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
+        marinates_list = recipes[0]["marinates"].split(", ")
+
+        return render_template('home/recipe_detail.html', recipes=recipes, marinates_list=marinates_list)
+
+
+@nosqlbp.route('/get_recipe', methods=['POST'])
+def get_recipe():
+    if request.method == 'POST':
+        recipe_id = request.form['recipe_id']
+
+        recipes = queryingNoSQL(method="SELECT", collection="recipe", type="one", filterBy=["rid"], filterVal=[str(recipe_id)])
+        # marinates_list = recipes[0]["marinates"].split(", ")
+        print(recipes)
+
+        return render_template('home/recipe_detail.html')
+    
+
+@nosqlbp.route('/recipes')
+def recipes():
+    recipes = queryingNoSQL(method="SELECT", collection='recipe')
+
+    return render_template('home/recipes.html', recipes=recipes)
     
     
 @mysqlbp.route('/inventory.html')

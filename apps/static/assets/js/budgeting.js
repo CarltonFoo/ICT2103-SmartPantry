@@ -2,7 +2,7 @@ var monthly_total = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 $(document).ready(function() {
     $.ajax({
-        url: '/grocery_history',
+        url: 'grocery_history',
         type: 'POST',
         success: function(data) {
             data = data.purchases
