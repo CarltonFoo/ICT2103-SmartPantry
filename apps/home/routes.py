@@ -71,9 +71,6 @@ def route_template(template):
             data = queryingMySQL(method="SELECT", table_name='user', filterBy=['username'], filterVal=[str(current_user)])
             print(data)
 
-        if template == "recipes.html":
-            data = [("dummy data")]
-
         if template == "inventory.html":
             data = [("dummy data")]
 
@@ -90,7 +87,7 @@ def route_template(template):
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, data=data)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
@@ -112,9 +109,6 @@ def route_template(template):
                                  'username'], filterVal=[str(current_user)])
             data = [data]
 
-        if template == "recipes.html":
-            data = [("dummy data")]
-
         if template == "inventory.html":
             '''
             data = queryingNoSQL(method="SELECT", collection='user', type='one', filterBy=['username'], filterVal=[str(current_user)])
@@ -124,6 +118,7 @@ def route_template(template):
             data = [("dummy data")]
             '''
             data = [("dummy data")]
+
         if template == "budgeting.html":
             data = [("dummy data")]
 
@@ -137,7 +132,7 @@ def route_template(template):
         segment = get_segment(request)
 
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, data=data)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
@@ -146,8 +141,8 @@ def route_template(template):
         return render_template('home/page-500.html'), 500
 
 
-@mysqlbp.route('/updateprofile', methods=['GET', 'POST'])
-@nosqlbp.route('/updateprofile', methods=['GET', 'POST'])
+@mysqlbp.route('/updateprofile', methods=['POST'])
+@nosqlbp.route('/updateprofile', methods=['POST'])
 @login_required
 def saveDetails():
     print("Updating profile...")
@@ -509,16 +504,18 @@ def insert_receipt_ingredient():
         return jsonify({'response': "OK"})
 
 
-@mysqlbp.route('/recipes')
+@mysqlbp.route('/recipes.html')
 def recipes():
     recipes = queryingMySQL(method="SELECT", table_name='recipe')
+    print(recipes)
 
     return render_template('home/recipes.html', recipes=recipes)
 
 
-@nosqlbp.route('/recipes')
+@nosqlbp.route('/recipes.html')
 def recipes():
     recipes = queryingNoSQL(method="SELECT", collection='recipe')
+    print(recipes)
 
     return render_template('home/recipes.html', recipes=recipes)
 
