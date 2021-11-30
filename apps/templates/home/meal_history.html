@@ -1,0 +1,96 @@
+{% extends "layouts/base.html" %} {% block title %} Sample Page {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %} {% endblock stylesheets %} {% block content %}
+
+<!-- [ Main Content ] start -->
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <!-- [ breadcrumb ] start -->
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Meal History</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="#!">Meal History</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- [ breadcrumb ] end -->
+        <!-- [ Main Content ] start -->
+        <div class="row">
+            <!-- [ sample-page ] start -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body table-border-style">
+                        <div class="input-group input-group-button mb-3">
+                            <input type="text" id="search" class="form-control" placeholder="Search for your food item">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Recipe Name</th>
+                                        <th>Dietary Type</th>
+                                        <th>Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="foodTable">
+                                    <!-- Shows each food item as a table record -->
+                                    {% for item in data %}
+                                    <tr>
+                                        <td>{{ item["date"] }}</td>
+                                        <td>{{ item["recipe_name"] }}</td>
+                                        <td>{{ item["dietary_type"] }}</td>
+                                        <td>
+                                            <a href="#!" style="display:block;" class="card-link m-t-20 viewDetails" data-id="{{ item['rid'] }}">View Recipe</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    <div id="recipeModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="recipeModal" style="display: none;" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                            <div class="modal-content">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ sample-page ] end -->
+        </div>
+        <!-- [ Main Content ] end -->
+    </div>
+</div>
+<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+    $(".viewDetails").click(function() {
+        var recipe_id = $(this).data('id');
+
+        $.ajax({
+            url: 'get_recipe',
+            type: 'POST',
+            data: {
+                recipe_id: recipe_id
+            },
+            success: function(data) {
+                $('.modal-content').html(data);
+                $('#recipeModal').modal('show');
+            }
+        });
+    });
+</script>{% endblock javascripts %}

@@ -103,6 +103,10 @@ def select_data(getheaders: list = None, filterBy: list = None, filterVal: list 
         elif getheaders is None:
             where = concatList(filterBy, filterVal)
             cursor.execute(f"SELECT * from {table_name} WHERE {where}")
+        else:
+            cols = listToStr(getheaders)
+            where = concatList(filterBy, filterVal)
+            cursor.execute(f"SELECT {cols} from {table_name} WHERE {where}")
 
     result = cursor.fetchall()
     return result

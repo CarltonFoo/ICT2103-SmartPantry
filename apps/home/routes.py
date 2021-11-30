@@ -74,9 +74,6 @@ def route_template(template):
         if template == "budgeting.html":
             data = [("dummy data")]
 
-        if template == "history.html":
-            data = [("dummy data")]
-
         if template == "aboutus.html":
             data = [("dummy data")]
 
@@ -117,9 +114,6 @@ def route_template(template):
             data = [("dummy data")]
 
         if template == "budgeting.html":
-            data = [("dummy data")]
-
-        if template == "history.html":
             data = [("dummy data")]
 
         if template == "aboutus.html":
@@ -430,6 +424,7 @@ def recipes():
 @mysqlbp.route('/get_recipe', methods=['POST'])
 def get_recipe():
     if request.method == 'POST':
+        print("asd")
         recipe_id = request.form['recipe_id']
         
         recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
@@ -668,3 +663,23 @@ def noSQL_delete():
         fooditem = list(set(food_list2)-set(fid_list))
 
     return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+@mysqlbp.route('/meal_history.html')
+@login_required
+def meal_history():
+    userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+    sql = "SELECT r.rid, m.date, r.recipe_name, r.dietary_type FROM mealhistory m, recipe r WHERE m.rid = r.rid AND m.id = " + str(userid[0]["id"])
+    mycursor = db.cursor(buffered=True, dictionary=True)
+    mycursor.execute(sql)
+    data = mycursor.fetchall()
+    print(data)
+    return render_template('home/meal_history.html', data=data)
+
+
+@nosqlbp.route('/index')
+@login_required
+def meal_history():
+    data = [("Data being pulled from NoSQL database!"),
+            ("MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.")]
+    return render_template('home/meal_history.html', data=data)
