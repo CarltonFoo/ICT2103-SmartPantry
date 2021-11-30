@@ -312,8 +312,6 @@ def grocery_history():
 @nosqlbp.route('/grocery_history', methods=['GET', 'POST'])
 def grocery_history():
     if request.method == 'POST':
-        user_id = current_user.id
-
         receipt_collection = nosql.db["receipt"]         
         purchases = receipt_collection.aggregate([
             {
@@ -343,9 +341,9 @@ def grocery_history():
         purchase_list = []
         
         for purchase in purchases:
-            purchase_list.append({"receipt_id": purchase["receipt"]["receipt_id"], "total_amount": purchase["receipt"]["total_amount"], "date": purchase["receipt_ingredient"]["date"]})
+            purchase_list.append({"receipt_id": purchase["receipt"]["receipt_id"], "total_amount": purchase["receipt"]["total_amount"], "user_id": purchase["receipt"]["uid"], "date": purchase["receipt_ingredient"]["date"]})
 
-        return jsonify({'purchases': purchase_list, 'type': 'nosql'})
+        return jsonify({'purchases': purchase_list, 'type': 'nosql', 'uid': current_user.id})
     else:
 
         return render_template('home/history.html')
@@ -443,6 +441,7 @@ def nosql_insert_receipt():
             new_receipt_id = highest_receipt_ids[0]["receipt_id"]
             
             receipt = [{
+                "uid": int(current_user.id),
                 "receipt_id": int(new_receipt_id) + 1,
                 "total_amount": float(total_amt)
             }]

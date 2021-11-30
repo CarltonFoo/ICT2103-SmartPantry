@@ -8,11 +8,11 @@ $(document).ready(function() {
             if (data.type == "nosql") {
                 purchases = data.purchases
 
-                var purchases = [...new Map(purchases.map(item => [JSON.stringify(item), item])).values()];
+                var purchases = [...new Map(purchases.map(item => [JSON.stringify(item), item])).values()]; //Takes one unique food_item belonging to the receipt
+
                 purchases.forEach(element => {
                     var date = new Date(element["date"]);
                     element["date"] = date.getMonth() + 1;
-                    console.log(element["date"]);
                 });
 
                 var sorted_purchases = purchases.reduce(function(r, a) {
@@ -21,10 +21,14 @@ $(document).ready(function() {
                     return r;
                 }, Object.create(null));
 
+                console.log(sorted_purchases);
+
                 for (const [key, value] of Object.entries(sorted_purchases)) {
-                    console.log(value);
                     for (var i = 0; i < Object.keys(value).length; i++) {
-                        monthly_total[key - 1] += value[i]["total_amount"];
+                        console.log(data.uid);
+                        if (value[i]["user_id"] == data.uid) {
+                            monthly_total[key - 1] += value[i]["total_amount"];
+                        }
                     }
                 }
             } else {
