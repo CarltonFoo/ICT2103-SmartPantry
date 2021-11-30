@@ -1,13 +1,8 @@
-{% extends "layouts/base.html" %}
-
-{% block title %} Dashboard {% endblock %}
+{% extends "layouts/base.html" %} {% block title %} Dashboard {% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}
-<link rel="stylesheet" href="/static/assets/css/index.css">
-{% endblock stylesheets %}
-
-{% block content %}
+<link rel="stylesheet" href="/static/assets/css/index.css"> {% endblock stylesheets %} {% block content %}
 
 <!-- [ Main Content ] start -->
 <div class="pcoded-main-container">
@@ -111,7 +106,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-xl-4 mb-3">
-                        <a href="history.html">
+                        <a href="grocery_history">
                             <div class="card bg-info order-card">
                                 <div class="card-body cardcontent">
                                     <div class="cardtext">
@@ -131,13 +126,13 @@
             <div class="col-md-12 col-xl-3">
                 <div class="card">
 
-                    
+
                     <div class="card-header">
                         <h5>{{ data[0] }}</h5>
                     </div>
                     <div class="card-body">
                         <p>
-                        {{ data[1] }}
+                            {{ data[1] }}
                         </p>
                     </div>
                 </div>

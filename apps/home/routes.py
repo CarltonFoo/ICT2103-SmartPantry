@@ -21,6 +21,8 @@ from flask.json import jsonify
 from flask.wrappers import Response
 from datetime import datetime
 import copy
+from itertools import groupby
+from operator import itemgetter
 
 nosql = NOSQL()
 mysql = sql_commands
@@ -246,6 +248,7 @@ def noSQLsearchItems():
 
 
 @nosqlbp.route('/price_checker')
+@login_required
 def price_chcker():
     data_list = nosql.select_data("all", "food_item")
     for data in data_list:
@@ -254,6 +257,7 @@ def price_chcker():
 
 
 @mysqlbp.route('/pricechecker.html')
+@login_required
 def price_checker():
     food_items = queryingMySQL(method="SELECT", table_name='food_item')
 
@@ -261,6 +265,7 @@ def price_checker():
 
 
 @nosqlbp.route('/pricechecker.html')
+@login_required
 def price_checker():
     food_items = queryingNoSQL(method="SELECT", collection='food_item')
 
@@ -268,6 +273,7 @@ def price_checker():
 
 
 @mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
+@login_required
 def grocery_history():
     if request.method == 'POST':
         user_id = current_user.id
@@ -305,11 +311,12 @@ def grocery_history():
                 food_list[3] = "..."
 
             all_food_list.append(", ".join(food_list[:4]))
-
-        return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
+            
+        return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list, type="mysql")
     
     
 @nosqlbp.route('/grocery_history', methods=['GET', 'POST'])
+@login_required
 def grocery_history():
     if request.method == 'POST':
         receipt_collection = nosql.db["receipt"]         
@@ -345,8 +352,74 @@ def grocery_history():
 
         return jsonify({'purchases': purchase_list, 'type': 'nosql', 'uid': current_user.id})
     else:
-
-        return render_template('home/history.html')
+        receipt_collection = nosql.db["receipt_ingredient"]         
+        purchases = receipt_collection.aggregate([
+            {
+                "$lookup": {
+                    "from": "food_item",
+                    "localField": "fid",
+                    "foreignField": "fid",
+                    "as": "food_item"
+                }
+            },
+            {
+                "$unwind": "$food_item"
+            },
+            {
+                "$lookup": {
+                    "from": "receipt",
+                    "localField": "receipt_id",
+                    "foreignField": "receipt_id",
+                    "as": "receipt"
+                }
+            },
+            {
+                "$unwind": "$receipt"
+            },
+            {
+                "$lookup": {
+                "from": "receipt_ingredient",
+                "localField": "receipt_id",
+                "foreignField": "receipt_id",
+                "as": "receipt_ingredient"
+                }
+            },
+            {
+                "$unwind": "$receipt_ingredient"
+            },
+        ])
+        
+        purchase_list = []
+        
+        for purchase in purchases:
+            purchase_list.append({"receipt_id": purchase["receipt"]["receipt_id"], 
+                                  "total_amount": purchase["receipt"]["total_amount"], 
+                                  "user_id": purchase["receipt"]["uid"], 
+                                  "date": purchase["receipt_ingredient"]["date"],
+                                  "food_name": purchase["food_item"]["food_name"]})
+        
+        processed_list = []
+        
+        # Groups receipt inredients by receipt_id
+        for key, value in groupby(purchase_list, key = itemgetter('receipt_id')):
+            food_list = []
+            date = None
+            receipt_id = None
+            total_amount = None
+            
+            for k in value:
+                if (k["food_name"] not in food_list):
+                    food_list.append(k["food_name"])
+                
+                date = k["date"]
+                receipt_id = k["receipt_id"]
+                total_amount = k["total_amount"]
+    
+            processed_list.append({"food_items": ", ".join(food_list[:3]), "food_length": len(food_list), "date": date, "receipt_id": receipt_id, "total_amount": total_amount})
+                
+        print(processed_list)
+        
+        return render_template('home/history.html', purchases=processed_list, type="nosql")
 
 
 @mysqlbp.route('/get_purchase', methods=['POST'])
@@ -398,14 +471,98 @@ def get_purchase():
 
         print(details)
 
-        return render_template('home/purchase_detail.html', purchases=purchases, details=details)
+        return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
     
     
 @nosqlbp.route('/get_purchase', methods=['POST'])
 def get_purchase():
     if request.method == 'POST':
+        rid = request.form['receipt_id']
 
-        return render_template('home/purchase_detail.html', purchases="purchases", details="details")
+        receipt_collection = nosql.db["receipt_ingredient"]         
+        purchases = receipt_collection.aggregate([
+            {
+                "$lookup": {
+                "from": "receipt_ingredient",
+                "localField": "receipt_id",
+                "foreignField": "receipt_id",
+                "as": "receipt_ingredient"
+                }
+            },
+            {
+                "$unwind": "$receipt_ingredient"
+            },
+            {
+                "$lookup": {
+                    "from": "food_item",
+                    "localField": "fid",
+                    "foreignField": "fid",
+                    "as": "food_item"
+                }
+            },
+            {
+                "$unwind": "$food_item"
+            },
+            {
+                "$lookup": {
+                    "from": "receipt",
+                    "localField": "receipt_id",
+                    "foreignField": "receipt_id",
+                    "as": "receipt"
+                }
+            },
+            {
+                "$unwind": "$receipt"
+            }
+        ])
+        
+        purchase_list = []
+        
+        for purchase in purchases:
+            purchase_list.append({"receipt_id": purchase["receipt"]["receipt_id"], 
+                                  "total_amount": purchase["receipt"]["total_amount"], 
+                                  "user_id": purchase["receipt"]["uid"], 
+                                  "date": purchase["receipt_ingredient"]["date"],
+                                  "final_weight": purchase["receipt_ingredient"]["weight"],
+                                  "food_name": purchase["food_item"]["food_name"],
+                                  "original_weight": purchase["food_item"]["weight"]})
+        
+        processed_list = []
+        
+        # Groups receipt inredients by receipt_id
+        for key, value in groupby(purchase_list, key = itemgetter('receipt_id')):
+            food_list = []
+            original_weight = []
+            # final_weight = []
+            
+            date = None
+            receipt_id = None
+            total_amount = None
+            
+            for k in value:            
+                if (k["food_name"] not in food_list):
+                    food_list.append(k["food_name"])
+                    
+                    original_weight.append(k["original_weight"])
+                    # final_weight.append(k["final_weight"])
+                
+                date = k["date"]
+                receipt_id = k["receipt_id"]
+                total_amount = k["total_amount"]
+    
+            # print(f"initial: {original_weight}")
+            # print(f"final: {final_weight}")
+            
+            # quantity_list = []
+            # quantity = 0
+
+            # for i in range(len(original_weight)):
+            #     quantity = final_weight[i] / original_weight[i]
+            #     quantity_list.append(int(quantity))
+            
+            processed_list.append({"food_items": food_list, "date": date, "receipt_id": receipt_id, "total_amount": total_amount, "initial_weight": original_weight})
+            
+        return render_template('home/purchase_detail.html', purchase=processed_list, index=int(rid) - 1, type="nosql")
 
 
 @mysqlbp.route('/insert_receipt', methods=["POST"])
@@ -478,6 +635,7 @@ def insert_receipt_ingredient():
                 date
             )
         ]
+        
         mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
         return jsonify({'response': "OK"})
@@ -495,7 +653,7 @@ def insert_receipt_ingredient():
             "receipt_id": int(receipt_id),
             "fid": int(fid),
             "weight": float(weight),
-            "date": datetime.fromisoformat(date)
+            "date": datetime.strptime(date, '%Y-%m-%d')
         }]
 
         queryingNoSQL(method="INSERT", collection='receipt_ingredient', data=receipt_ingredient) 
@@ -504,6 +662,7 @@ def insert_receipt_ingredient():
 
 
 @mysqlbp.route('/recipes.html')
+@login_required
 def recipes():
     recipes = queryingMySQL(method="SELECT", table_name='recipe')
     print(recipes)
@@ -512,6 +671,7 @@ def recipes():
 
 
 @nosqlbp.route('/recipes.html')
+@login_required
 def recipes():
     recipes = queryingNoSQL(method="SELECT", collection='recipe')
     print(recipes)
