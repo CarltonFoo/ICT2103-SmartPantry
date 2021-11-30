@@ -1,3 +1,4 @@
+from dns.rdatatype import NULL
 from apps.home import mysqlbp, nosqlbp
 from flask import render_template, request, jsonify
 from flask_login import login_required
@@ -18,6 +19,8 @@ import json
 
 from flask.json import jsonify
 from flask.wrappers import Response
+from datetime import datetime
+import copy
 
 nosql = NOSQL()
 mysql = sql_commands
@@ -286,6 +289,7 @@ def grocery_history():
                 monthly_totals[y].append((x))
             else:
                 monthly_totals[y] = [(x)]
+        print(monthly_totals)
 
         return jsonify({'purchases': monthly_totals})
     else:
@@ -308,6 +312,48 @@ def grocery_history():
             all_food_list.append(", ".join(food_list[:4]))
 
         return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list)
+    
+    
+@nosqlbp.route('/grocery_history', methods=['GET', 'POST'])
+def grocery_history():
+    if request.method == 'POST':
+        user_id = current_user.id
+
+        receipt_collection = nosql.db["receipt"]         
+        purchases = receipt_collection.aggregate([
+            {
+                "$lookup": {
+                "from": "receipt_ingredient",
+                "localField": "receipt_id",
+                "foreignField": "receipt_id",
+                "as": "receipt_ingredient"
+                }
+            },
+            {
+                "$unwind": "$receipt_ingredient"
+            },
+            {
+                "$lookup": {
+                    "from": "receipt",
+                    "localField": "receipt_id",
+                    "foreignField": "receipt_id",
+                    "as": "receipt"
+                }
+            },
+            {
+                "$unwind": "$receipt"
+            }
+        ])
+        
+        purchase_list = []
+        
+        for purchase in purchases:
+            purchase_list.append({"receipt_id": purchase["receipt"]["receipt_id"], "total_amount": purchase["receipt"]["total_amount"], "date": purchase["receipt_ingredient"]["date"]})
+
+        return jsonify({'purchases': purchase_list, 'type': 'nosql'})
+    else:
+
+        return render_template('home/history.html')
 
 
 @mysqlbp.route('/get_purchase', methods=['POST'])
@@ -360,6 +406,13 @@ def get_purchase():
         print(details)
 
         return render_template('home/purchase_detail.html', purchases=purchases, details=details)
+    
+    
+@nosqlbp.route('/get_purchase', methods=['POST'])
+def get_purchase():
+    if request.method == 'POST':
+
+        return render_template('home/purchase_detail.html', purchases="purchases", details="details")
 
 
 @mysqlbp.route('/insert_receipt', methods=["POST"])
@@ -377,22 +430,42 @@ def insert_receipt():
         mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
         mycursor = mysql.cursor2
-        mycursor.execute(
-            "SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+        mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
         receipt_id = mycursor.fetchone()
 
-        return jsonify({'receipt_id': receipt_id})
+        return jsonify({'receipt_id': receipt_id[0]})
 
 
 @nosqlbp.route('/insert_receipt', methods=['POST'])
 def nosql_insert_receipt():
-    try:
-        recipe_collection = nosql.db.recipe
-        recipe_collection.rename('recipe')
-        return "OK"
-    except Exception as ex:
-        print(ex)
-        return "NO"
+    if request.method == 'POST':
+        total_amt = request.form['total_amt']
+        
+        receipt_collection = nosql.db["receipt"] 
+        highest_receipt_ids = receipt_collection.find({ },{"receipt_id": 1}).sort("receipt_id", -1)
+
+        try:
+            new_receipt_id = highest_receipt_ids[0]["receipt_id"]
+            
+            receipt = [{
+                "receipt_id": int(new_receipt_id) + 1,
+                "total_amount": float(total_amt)
+            }]
+            
+            queryingNoSQL(method="INSERT", collection='receipt', data=receipt) 
+
+            return jsonify({'receipt_id': new_receipt_id + 1})
+        except:
+            print("Empty collection")
+            
+            receipt = [{
+                "receipt_id": 1,
+                "total_amount": float(total_amt)
+            }]
+
+            queryingNoSQL(method="INSERT", collection='receipt', data=receipt) 
+            
+            return jsonify({'receipt_id': 1})
 
 
 @mysqlbp.route('/insert_receipt_ingredient', methods=["POST"])
@@ -412,6 +485,26 @@ def insert_receipt_ingredient():
             )
         ]
         mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+
+        return jsonify({'response': "OK"})
+    
+    
+@nosqlbp.route('/insert_receipt_ingredient', methods=["POST"])
+def insert_receipt_ingredient():
+    if request.method == 'POST':
+        receipt_id = request.form['receipt_id']
+        fid = request.form['fid']
+        weight = request.form['weight']
+        date = request.form['date']
+
+        receipt_ingredient = [{
+            "receipt_id": int(receipt_id),
+            "fid": int(fid),
+            "weight": float(weight),
+            "date": datetime.fromisoformat(date)
+        }]
+
+        queryingNoSQL(method="INSERT", collection='receipt_ingredient', data=receipt_ingredient) 
 
         return jsonify({'response': "OK"})
 

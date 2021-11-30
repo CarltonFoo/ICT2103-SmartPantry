@@ -282,7 +282,6 @@
             alert("Current shopping list is empty. Please add items before going to checkout.")
         } else {
             if (confirm("Are you sure you want to purchase these items?")) {
-                var receipt_id;
                 $.ajax({
                     url: 'insert_receipt',
                     type: 'POST',
@@ -290,8 +289,7 @@
                         "total_amt": total_amt
                     },
                     success: function(data) {
-                        receipt_id = data.receipt_id[0];
-
+                        var receipt_id = data.receipt_id;
                         addFoodItem(receipt_id);
 
                         // Emptying the shopping list stored in localstorage
