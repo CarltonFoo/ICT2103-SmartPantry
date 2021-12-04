@@ -1,5 +1,5 @@
 <!-- Shows purchase details -->
-{% for purchase in purchases %}
+{% if type == "mysql" %} {% for purchase in purchases %}
 <div class="table-responsive">
     <table class="table table-borderless">
         <tbody>
@@ -26,4 +26,31 @@
         </tbody>
     </table>
 </div>
-{% endfor %}
+{% endfor %} {% endif %} {% if type == "nosql" %}
+<div class="table-responsive">
+    <table class="table table-borderless">
+        <tbody>
+            <tr>
+                <td><strong>Receipt ID</strong></td>
+                <td> </td>
+                <td>#{{ purchase[index]["receipt_id"] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Food Items</strong></td>
+                <td> </td>
+                <td>{% for i in range(purchase[index]["food_items"] | length) %} {{ purchase[index]["food_items"][i] }} ({{ purchase[index]["initial_weight"][i] }}g)<br>{% endfor %}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Amount</strong></td>
+                <td> </td>
+                <td>${{ purchase[index]["total_amount"] }}</td>
+            </tr>
+            <tr>
+                <td><strong>Purchase Date</strong></td>
+                <td> </td>
+                <td>{{ purchase[index]["date"].strftime('%d %b %Y') }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}

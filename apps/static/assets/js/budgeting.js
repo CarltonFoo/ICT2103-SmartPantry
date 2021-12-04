@@ -5,10 +5,38 @@ $(document).ready(function() {
         url: 'grocery_history',
         type: 'POST',
         success: function(data) {
-            data = data.purchases
+            if (data.type == "nosql") {
+                purchases = data.purchases
 
-            for (const item in data) {
-                monthly_total[item - 1] = getSum(data[item])
+                var purchases = [...new Map(purchases.map(item => [JSON.stringify(item), item])).values()]; //Takes one unique food_item belonging to the receipt
+
+                purchases.forEach(element => {
+                    var date = new Date(element["date"]);
+                    element["date"] = date.getMonth() + 1;
+                });
+
+                var sorted_purchases = purchases.reduce(function(r, a) {
+                    r[a.date] = r[a.date] || [];
+                    r[a.date].push(a);
+                    return r;
+                }, Object.create(null));
+
+                console.log(sorted_purchases);
+
+                for (const [key, value] of Object.entries(sorted_purchases)) {
+                    for (var i = 0; i < Object.keys(value).length; i++) {
+                        console.log(data.uid);
+                        if (value[i]["user_id"] == data.uid) {
+                            monthly_total[key - 1] += value[i]["total_amount"];
+                        }
+                    }
+                }
+            } else {
+                data = data.purchases
+
+                for (const item in data) {
+                    monthly_total[item - 1] = getSum(data[item])
+                }
             }
             initialiseChart(monthly_total);
         }

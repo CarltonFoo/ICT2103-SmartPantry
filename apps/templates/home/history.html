@@ -1,4 +1,4 @@
-{% extends "layouts/base.html" %} {% block title %} Sample Page {% endblock %}
+{% extends "layouts/base.html" %} {% block title %} Grocery History {% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %} {% endblock stylesheets %} {% block content %}
@@ -48,7 +48,7 @@
                                 </thead>
                                 <tbody id="purchaseTable">
                                     <!-- Shows each purchase as a table record -->
-                                    {% for i in range(purchases | length) %}
+                                    {% if type == "mysql" %} {% for i in range(purchases | length) %}
                                     <tr>
                                         <td>{{ purchases[i][3] }}</td>
                                         <td>{{ all_food_list[i] }}</td>
@@ -58,7 +58,17 @@
                                             <button type="button" class="btn btn-warning viewDetails" data-id="{{ purchases[i][3] }}">View Details</button>
                                         </td>
                                     </tr>
-                                    {% endfor %}
+                                    {% endfor %} {% else %} {% for purchase in purchases %}
+                                    <tr>
+                                        <td>{{ purchase["receipt_id"] }}</td>
+                                        <td>{{ purchase["food_items"] }}{% if purchase["food_length"] > 3 %}, ...{% endif %}</td>
+                                        <td>${{ purchase["total_amount"] }}</td>
+                                        <td>{{ purchase["date"].strftime('%d %b %Y') }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-warning viewDetails" data-id="{{ purchase['receipt_id'] }}">View Details</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %} {% endif %}
                                 </tbody>
                             </table>
                         </div>
