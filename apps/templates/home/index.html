@@ -31,21 +31,6 @@
 
                 <div class="row">
                     <div class="col-md-6 col-xl-4 mb-3">
-                        <a href="recipes.html">
-                            <div class="card bg-primary order-card">
-                                <div class="card-body cardcontent">
-                                    <div class="cardtext">
-                                        <p class="text-white cardtitle">Recipes</p>
-                                        <p class="m-b-0 carddesc">Looking to cook a meal? Check out our recipes!</p>
-                                    </div>
-                                    <h2 class="text-right text-white float-right cardicon">
-                                        <i class="bi-book"></i>
-                                    </h2>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6 col-xl-4 mb-3">
                         <a href="inventory.html">
                             <div class="card bg-c-red order-card">
                                 <div class="card-body cardcontent">
@@ -61,15 +46,30 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-xl-4 mb-3">
-                        <a href="profile.html">
+                        <a href="recipes.html">
+                            <div class="card bg-primary order-card">
+                                <div class="card-body cardcontent">
+                                    <div class="cardtext">
+                                        <p class="text-white cardtitle">Recipes</p>
+                                        <p class="m-b-0 carddesc">Looking to cook a meal? Check out our recipes!</p>
+                                    </div>
+                                    <h2 class="text-right text-white float-right cardicon">
+                                        <i class="bi-book"></i>
+                                    </h2>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-xl-4 mb-3">
+                        <a href="meal_history.html">
                             <div class="card bg-warning order-card">
                                 <div class="card-body cardcontent">
                                     <div class="cardtext">
-                                        <p class="text-white cardtitle">Profile</p>
-                                        <p class="m-b-0 carddesc">Change your profile settings here</p>
+                                        <p class="text-white cardtitle">Meal History</p>
+                                        <p class="m-b-0 carddesc">Take a look at what you've eaten previously!</p>
                                     </div>
                                     <h2 class="text-right text-white float-right cardicon">
-                                        <i class="feather icon-user"></i>
+                                        <i class="bi-card-checklist"></i>
                                     </h2>
                                 </div>
                             </div>
@@ -120,6 +120,21 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-md-6 col-xl-4 mb-3">
+                        <a href="profile.html">
+                            <div class="card bg-warning order-card">
+                                <div class="card-body cardcontent">
+                                    <div class="cardtext">
+                                        <p class="text-white cardtitle">Profile</p>
+                                        <p class="m-b-0 carddesc">Change your profile settings here</p>
+                                    </div>
+                                    <h2 class="text-right text-white float-right cardicon">
+                                        <i class="feather icon-user"></i>
+                                    </h2>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
 
             </div>
@@ -153,8 +168,6 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-<!-- Apex Chart -->
-<script src="/static/assets/js/plugins/apexcharts.min.js"></script>
 <!-- custom-chart js -->
 <script src="/static/assets/js/pages/dashboard-main.js"></script>
 
