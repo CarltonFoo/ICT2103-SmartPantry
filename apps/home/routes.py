@@ -299,21 +299,6 @@ def grocery_history():
                 print(monthly_totals)
 
                 return jsonify({'purchases': monthly_totals})
-
-        # sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
-
-        # mycursor.execute(sql)
-        # purchases = mycursor.fetchall()
-
-        # monthly_totals = {}
-        # for x, y in purchases:
-        #     if y in monthly_totals:
-        #         monthly_totals[y].append((x))
-        #     else:
-        #         monthly_totals[y] = [(x)]
-        # print(monthly_totals)
-
-        # return jsonify({'purchases': monthly_totals})
     else:
         user_id = current_user.id
 
@@ -578,49 +563,6 @@ def get_purchase():
                 print(details)
 
                 return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
-
-        # mycursor.execute(sql)
-        # purchases = mycursor.fetchall()
-
-        # details = {"food_items": [],
-        #            "food_quantity": [], "original_weight": []}
-
-        # food_list = []
-        # price_list = []
-        # original_weight_list = []
-        # final_weight_list = []
-
-        # for purchase in purchases:
-        #     food_list = purchase[0].split(",")
-        #     price_list = purchase[1].split(",")
-        #     original_weight_list = purchase[2].split(",")
-        #     final_weight_list = purchase[4].split(",")
-
-        # price_list = list(map(float, price_list))
-
-        # original_weight_list = list(map(float, original_weight_list))
-        # final_weight_list = list(map(float, final_weight_list))
-
-        # quantity_list = []
-        # quantity = 0
-
-        # for i in range(len(original_weight_list)):
-        #     quantity = final_weight_list[i] / original_weight_list[i]
-        #     quantity_list.append(int(quantity))
-
-        # # total_amt = 0
-        # # for i in range(len(price_list)):
-        # #     total_amt += price_list[i] * quantity_list[i]
-
-        # # total_amt = "{:.2f}".format(total_amt)
-
-        # details["food_items"] = food_list
-        # details["food_quantity"] = quantity_list
-        # details["original_weight"] = original_weight_list
-
-        # print(details)
-
-        # return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
     
     
 @nosqlbp.route('/get_purchase', methods=['POST'])
@@ -747,14 +689,6 @@ def insert_receipt():
                 receipt_id = mycursor.fetchone()
 
                 return jsonify({'receipt_id': receipt_id[0]})
-        
-        # mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
-
-        # mycursor = mysql.cursor2
-        # mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
-        # receipt_id = mycursor.fetchone()
-
-        # return jsonify({'receipt_id': receipt_id[0]})
 
 
 @nosqlbp.route('/insert_receipt', methods=['POST'])
@@ -821,10 +755,6 @@ def insert_receipt_ingredient():
                 mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
                 return jsonify({'response': "OK"})
-                    
-        # mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
-
-        # return jsonify({'response': "OK"})
     
     
 @nosqlbp.route('/insert_receipt_ingredient', methods=["POST"])
@@ -865,10 +795,6 @@ def recipes():
                 create_table(table_name='recipe', dir=dir)
                 recipes = queryingMySQL(method="SELECT", table_name='recipe')
                 return render_template('home/recipes.html', recipes=recipes)
-            
-    # recipes = queryingMySQL(method="SELECT", table_name='recipe')
-
-    # return render_template('home/recipes.html', recipes=recipes)
 
 
 @nosqlbp.route('/recipes.html')
@@ -902,11 +828,6 @@ def get_recipe():
                 marinates_list = recipes[0]["marinates"].split(", ")
 
                 return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
-
-        # recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
-        # marinates_list = recipes[0]["marinates"].split(", ")
-
-        # return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
 
 
 @nosqlbp.route('/get_recipe', methods=['POST'])
@@ -945,10 +866,6 @@ def GetPantryItems():
         mycursor3 = db.cursor(buffered=True, dictionary=True)
         mycursor3.execute(sql3)
         fooditem = mycursor3.fetchall()
-        #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
-        #mycursor4 = db.cursor(buffered=True, dictionary=True)
-        # mycursor4.execute(sql4)
-        #maxfoodname= mycursor3.fetchall()
 
         return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
     
@@ -973,10 +890,6 @@ def GetPantryItems():
             mycursor3 = db.cursor(buffered=True, dictionary=True)
             mycursor3.execute(sql3)
             fooditem = mycursor3.fetchall()
-            #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
-            #mycursor4 = db.cursor(buffered=True, dictionary=True)
-            # mycursor4.execute(sql4)
-            #maxfoodname= mycursor3.fetchall()
 
             return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
 
@@ -1083,11 +996,6 @@ def noSQL_update_pantry():
                     }
                 }
             )
-        # return Response(
-        #     response=json.dumps({"message": "user updated"}),
-        #     status=200,
-        #     mimetype="application/json"
-        # )
         return redirect("inventory.html")
     except Exception as ex:
         print(ex)
