@@ -1,4 +1,5 @@
 import mysql.connector
+from Objects.createTables import setUpDB
 
 import os
 from os.path import join, dirname
@@ -160,6 +161,13 @@ def update_data(table_name: str, data: dict, identifier: str, identifier_value: 
 
         db.commit()
         print(f"{table_name} table updated successfully.")
+
+
+def create_table(table_name: str, dir: str):
+    if table_name is None or table_name.isspace():
+        raise ValueError("Table name cannot be Null value or whitespace characters")
+    setUpDB(db,dir)
+    db.commit()
 
 
 # mydb = mysql.connector.connect(

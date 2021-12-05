@@ -12,15 +12,15 @@ def setUpDB(db,filePath):
                 cursor.execute(command)
         except IOError as msg:
             print("command skipped: ", msg)
-    mydb.commit()
+    db.commit()
     print("successfully created")
     return
 
-mydb = mysql.connector.connect(
-# Database connection
-    host="localhost",
-    user="root",
-    password=""
-)
-filePath = './sql_scripts/full_script.sql'
-setUpDB(mydb,filePath)
+# mydb = mysql.connector.connect(
+# # Database connection
+#     host="localhost",
+#     user="root",
+#     password=""
+# )
+# filePath = './sql_scripts/full_script.sql'
+# setUpDB(mydb,filePath)

@@ -24,6 +24,10 @@ import copy
 from itertools import groupby
 from operator import itemgetter
 
+from mysql.connector import errorcode, Error
+from Objects.sql_commands import *
+
+
 nosql = NOSQL()
 mysql = sql_commands
 
@@ -44,7 +48,7 @@ def get_segment(request):
     except:
         return None
 
-
+# Homepage Right Card
 @mysqlbp.route('/index')
 @login_required
 def index():
@@ -61,6 +65,7 @@ def index():
     return render_template('home/index.html', segment='index', data=data)
 
 
+# Misc Template Routes
 @mysqlbp.route('/<template>')
 @login_required
 def route_template(template):
@@ -137,6 +142,7 @@ def route_template(template):
         return render_template('home/page-500.html'), 500
 
 
+# Update profile process
 @mysqlbp.route('/updateprofile', methods=['POST'])
 @nosqlbp.route('/updateprofile', methods=['POST'])
 @login_required
@@ -199,6 +205,25 @@ def saveDetails():
         return render_template('home/profile.html', data=data)
 
 
+# Display data on pricechecker
+@mysqlbp.route('/pricechecker.html')
+@login_required
+def price_checker():
+    food_items = queryingMySQL(method="SELECT", table_name='food_item')
+
+    return render_template('home/pricechecker.html', food_items=food_items)
+
+
+@nosqlbp.route('/pricechecker.html')
+@login_required
+def price_chcker():
+    data_list = nosql.select_data("all", "food_item")
+    for data in data_list:
+        data["_id"] = str(data["_id"])
+    return render_template('home/pricechecker.html', food_items=data_list)
+
+
+# Search item on pricechecker
 @mysqlbp.route('/pricechecker', methods=['GET'])
 @login_required
 def searchItem():
@@ -241,38 +266,51 @@ def noSQLsearchItems():
         print(ex)
 
 
-@nosqlbp.route('/price_checker')
-@login_required
-def price_chcker():
-    data_list = nosql.select_data("all", "food_item")
-    for data in data_list:
-        data["_id"] = str(data["_id"])
-    return jsonify(data_list)
-
-
-@mysqlbp.route('/pricechecker.html')
-@login_required
-def price_checker():
-    food_items = queryingMySQL(method="SELECT", table_name='food_item')
-
-    return render_template('home/pricechecker.html', food_items=food_items)
-
-
-@nosqlbp.route('/pricechecker.html')
-@login_required
-def price_checker():
-    food_items = queryingNoSQL(method="SELECT", collection='food_item')
-
-    return render_template('home/pricechecker.html', food_items=food_items)
-
 
 @mysqlbp.route('/grocery_history', methods=['GET', 'POST'])
 @login_required
 def grocery_history():
     if request.method == 'POST':
+        
         user_id = current_user.id
 
         mycursor = mysql.cursor2
+
+        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
+
+        try:
+            #mySQL
+
+            mycursor.execute(sql)
+            purchases = mycursor.fetchall()
+
+            monthly_totals = {}
+            for x, y in purchases:
+                if y in monthly_totals:
+                    monthly_totals[y].append((x))
+                else:
+                    monthly_totals[y] = [(x)]
+            print(monthly_totals)
+
+            return jsonify({'purchases': monthly_totals})
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir = os.path.join(os.path.dirname(__file__), "../../sql_scripts/", f'receipt_ingredient.sql')
+                create_table(table_name='receipt_ingredient', dir=dir)
+                mycursor.execute(sql)
+                purchases = mycursor.fetchall()
+
+                monthly_totals = {}
+                for x, y in purchases:
+                    if y in monthly_totals:
+                        monthly_totals[y].append((x))
+                    else:
+                        monthly_totals[y] = [(x)]
+                print(monthly_totals)
+
+                return jsonify({'purchases': monthly_totals})
+
         sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
 
         mycursor.execute(sql)
@@ -293,21 +331,47 @@ def grocery_history():
         mycursor = mysql.cursor2
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' GROUP BY ri.receipt_id".format(user_id)
 
-        mycursor.execute(sql)
-        purchases = mycursor.fetchall()
+        try:
+            #mySQL
 
-        food_list = []
-        all_food_list = []
-        for purchase in purchases:
-            food_list = purchase[0].split(",")
+            mycursor.execute(sql)
+            purchases = mycursor.fetchall()
 
-            if (len(food_list) > 3):
-                food_list[3] = "..."
+            food_list = []
+            all_food_list = []
+            for purchase in purchases:
+                food_list = purchase[0].split(",")
 
-            all_food_list.append(", ".join(food_list[:4]))
-            
-        return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list, type="mysql")
-    
+                if (len(food_list) > 3):
+                    food_list[3] = "..."
+
+                all_food_list.append(", ".join(food_list[:4]))
+
+            return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list, type="mysql")
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                print(dir)
+                create_table(table_name='receipt_ingredient', dir=dir)
+                mycursor.execute(sql)
+                purchases = mycursor.fetchall()
+
+                mycursor.execute(sql)
+                purchases = mycursor.fetchall()
+
+                food_list = []
+                all_food_list = []
+                for purchase in purchases:
+                    food_list = purchase[0].split(",")
+
+                    if (len(food_list) > 3):
+                        food_list[3] = "..."
+
+                    all_food_list.append(", ".join(food_list[:4]))
+
+                return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list, type="mysql")
+
     
 @nosqlbp.route('/grocery_history', methods=['GET', 'POST'])
 @login_required
@@ -655,11 +719,11 @@ def insert_receipt_ingredient():
         return jsonify({'response': "OK"})
 
 
+# Show recipes on recipes.html
 @mysqlbp.route('/recipes.html')
 @login_required
 def recipes():
     recipes = queryingMySQL(method="SELECT", table_name='recipe')
-    print(recipes)
 
     return render_template('home/recipes.html', recipes=recipes)
 
@@ -668,15 +732,14 @@ def recipes():
 @login_required
 def recipes():
     recipes = queryingNoSQL(method="SELECT", collection='recipe')
-    print(recipes)
 
     return render_template('home/recipes.html', recipes=recipes)
 
 
+# View recipe details
 @mysqlbp.route('/get_recipe', methods=['POST'])
 def get_recipe():
     if request.method == 'POST':
-        print("asd")
         recipe_id = request.form['recipe_id']
         
         recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
@@ -921,17 +984,30 @@ def noSQL_delete():
 @login_required
 def meal_history():
     userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+    print("userid", userid)
     sql = "SELECT r.rid, m.date, r.recipe_name, r.dietary_type FROM mealhistory m, recipe r WHERE m.rid = r.rid AND m.id = " + str(userid[0]["id"])
     mycursor = db.cursor(buffered=True, dictionary=True)
     mycursor.execute(sql)
     data = mycursor.fetchall()
-    print(data)
+    print("data", data)
     return render_template('home/meal_history.html', data=data)
 
-
-@nosqlbp.route('/index')
+@nosqlbp.route('/meal_history.html')
 @login_required
 def meal_history():
-    data = [("Data being pulled from NoSQL database!"),
-            ("MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas.")]
+
+    userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
+
+    # data = db.getCollection('mealhistory').aggregate([
+    # {$match : {admin : 1}},
+    # {$lookup: {from: "posts",localField: "_id",foreignField: "owner_id",as: "posts"}},
+    # {$project : {
+    #         posts : { $filter : {input : "$posts"  , as : "post", cond : { $eq : ['$$post.via' , 'facebook'] } } },
+    #         admin : 1
+    #     }}
+    # ])
+
+    data = [{'rid': 3, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Fish Masala', 'dietary_type': 'Indian Food'}, {
+        'rid': 5, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Steamed Pork In Prawn Paste', 'dietary_type': 'Chinese Food'}]
+    print(userid)
     return render_template('home/meal_history.html', data=data)

@@ -42,11 +42,11 @@
                                         <th>Link</th>
                                     </tr>
                                 </thead>
-                                <tbody id="foodTable">
+                                <tbody id="mealTable">
                                     <!-- Shows each food item as a table record -->
                                     {% for item in data %}
                                     <tr>
-                                        <td>{{ item["date"] }}</td>
+                                        <td>{{ item["date"].strftime('%d %b %Y')  }}</td>
                                         <td>{{ item["recipe_name"] }}</td>
                                         <td>{{ item["dietary_type"] }}</td>
                                         <td>
@@ -78,6 +78,16 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
+    $(document).ready(function() {
+        // Search function on table
+        $("#search").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $("#mealTable tr").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+
     $(".viewDetails").click(function() {
         var recipe_id = $(this).data('id');
 
