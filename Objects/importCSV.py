@@ -24,11 +24,3 @@ class CSV:
     def  csv_to_sql(self, con, table: str, ifExists = 'append', chunkSize = 1000):
         """This function inserts Pandas DataFrames into a Database"""
         self.df.to_sql(table, con,if_exists=ifExists, chunksize= chunkSize)
-
-# engine = create_engine('sqlite://', echo=False)
-# a = CSV("AverageFoodPrices.csv")
-# b = CSV("FoodReceipes.csv")
-
-# print(a.df)
-# print(b.df)
-# a.csv_to_sql(table="users", con=engine)

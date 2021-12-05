@@ -1,50 +1,39 @@
+import json
+import copy
+from datetime import datetime
+from itertools import groupby
+from operator import itemgetter
 from dns.rdatatype import NULL
 from apps.home import mysqlbp, nosqlbp
+from apps.authentication.util import hash_pass
+from apps.authentication.models import Users
 from flask import render_template, request, jsonify
 from flask_login import login_required
-from jinja2 import TemplateNotFound
-from Objects import sql_commands
 from flask_login import (
     current_user,
     login_required
 )
-from Controls.queryControl import queryingMySQL, queryingNoSQL
-from Objects.sql_commands import db
-from apps.authentication.util import hash_pass
-from apps.authentication.models import Users
-
-from Objects.nosql_commands import NOSQL
-
-import json
-
 from flask.json import jsonify
 from flask.wrappers import Response
-from datetime import datetime
-import copy
-from itertools import groupby
-from operator import itemgetter
-
-from mysql.connector import errorcode, Error
+from jinja2 import TemplateNotFound
+from Objects import sql_commands
+from Objects.sql_commands import db
 from Objects.sql_commands import *
+from Objects.nosql_commands import NOSQL
+from Controls.queryControl import queryingMySQL, queryingNoSQL
+from mysql.connector import errorcode, Error
 
 
 nosql = NOSQL()
 mysql = sql_commands
 
 # Helper - Extract current page name from request
-
-
 def get_segment(request):
-
     try:
-
         segment = request.path.split('/')[-1]
-
         if segment == '':
             segment = 'index'
-
         return segment
-
     except:
         return None
 
@@ -114,13 +103,6 @@ def route_template(template):
             data = [data]
 
         if template == "inventory.html":
-            '''
-            data = queryingNoSQL(method="SELECT", collection='user', type='one', filterBy=['username'], filterVal=[str(current_user)])
-            data['_id'] = str(data['_id'])
-            data = jsonify(data)
-            data = data.pantry
-            data = [("dummy data")]
-            '''
             data = [("dummy data")]
 
         if template == "budgeting.html":
@@ -1149,8 +1131,6 @@ def Create():
 
         try:
             #mySQL
-        
-
             mycursor.execute(sql)
             db.commit()
 
@@ -1359,23 +1339,17 @@ def meal_history():
         return render_template('home/meal_history.html', data=data)
     
     except Error as err:
-            if err.errno == errorcode.ER_NO_SUCH_TABLE:
-                print(f'Create table mealhistory')
-                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'mealhistory.sql')
-                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'recipe.sql')
-                create_table(table_name='mealhistory', dir=dir1)
-                create_table(table_name='recipe', dir=dir2)
-                mycursor.execute(sql)
-                data = mycursor.fetchall()
-                print("data", data)
-                return render_template('home/meal_history.html', data=data)
+        if err.errno == errorcode.ER_NO_SUCH_TABLE:
+            print(f'Create table mealhistory')
+            dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'mealhistory.sql')
+            dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'recipe.sql')
+            create_table(table_name='mealhistory', dir=dir1)
+            create_table(table_name='recipe', dir=dir2)
+            mycursor.execute(sql)
+            data = mycursor.fetchall()
+            print("data", data)
+            return render_template('home/meal_history.html', data=data)
 
-
-
-    # mycursor.execute(sql)
-    # data = mycursor.fetchall()
-    # print("data", data)
-    # return render_template('home/meal_history.html', data=data)
 
 @nosqlbp.route('/meal_history.html')
 @login_required
@@ -1407,8 +1381,6 @@ def meal_history():
         }
     ])
 
-    print(mealhistory)
-
     mealhistory_list = []
 
     for history in mealhistory:
@@ -1417,7 +1389,5 @@ def meal_history():
                                     "date": history["mealhistory"]["date"],
                                     "recipe_name": history["recipe"]["recipe_name"],
                                     "dietary_type": history["recipe"]["dietary_type"]})
-
-    print(mealhistory_list)
     
     return render_template('home/meal_history.html', data=mealhistory_list)
