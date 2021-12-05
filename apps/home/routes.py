@@ -209,6 +209,8 @@ def saveDetails():
 @mysqlbp.route('/pricechecker.html')
 @login_required
 def price_checker():
+    
+
     food_items = queryingMySQL(method="SELECT", table_name='food_item')
 
     return render_template('home/pricechecker.html', food_items=food_items)
@@ -234,6 +236,8 @@ def searchItem():
             sql = "SELECT * FROM user WHERE username LIKE '%" + input + "%'"
 
             mycursor = db.cursor(buffered=True, dictionary=True)
+
+
             mycursor.execute(sql)
             db.commit()
             data = mycursor.fetchall()
@@ -296,8 +300,10 @@ def grocery_history():
         except Error as err:
             if err.errno == errorcode.ER_NO_SUCH_TABLE:
                 print(f'Create table receipt_ingredient')
-                dir = os.path.join(os.path.dirname(__file__), "../../sql_scripts/", f'receipt_ingredient.sql')
-                create_table(table_name='receipt_ingredient', dir=dir)
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt.sql')
+                create_table(table_name='receipt', dir=dir1)
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                create_table(table_name='receipt_ingredient', dir=dir2)
                 mycursor.execute(sql)
                 purchases = mycursor.fetchall()
 
@@ -311,20 +317,20 @@ def grocery_history():
 
                 return jsonify({'purchases': monthly_totals})
 
-        sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
+        # sql = "SELECT DISTINCT r.total_amount, month(ri.date) FROM receipt_ingredient ri, receipt r WHERE ri.receipt_id = r.receipt_id AND r.id = '{}'".format(user_id)
 
-        mycursor.execute(sql)
-        purchases = mycursor.fetchall()
+        # mycursor.execute(sql)
+        # purchases = mycursor.fetchall()
 
-        monthly_totals = {}
-        for x, y in purchases:
-            if y in monthly_totals:
-                monthly_totals[y].append((x))
-            else:
-                monthly_totals[y] = [(x)]
-        print(monthly_totals)
+        # monthly_totals = {}
+        # for x, y in purchases:
+        #     if y in monthly_totals:
+        #         monthly_totals[y].append((x))
+        #     else:
+        #         monthly_totals[y] = [(x)]
+        # print(monthly_totals)
 
-        return jsonify({'purchases': monthly_totals})
+        # return jsonify({'purchases': monthly_totals})
     else:
         user_id = current_user.id
 
@@ -349,11 +355,14 @@ def grocery_history():
 
             return render_template('home/history.html', purchases=purchases, all_food_list=all_food_list, type="mysql")
         except Error as err:
+            print(err)
+
             if err.errno == errorcode.ER_NO_SUCH_TABLE:
                 print(f'Create table receipt_ingredient')
-                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
-                print(dir)
-                create_table(table_name='receipt_ingredient', dir=dir)
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt.sql')
+                create_table(table_name='receipt', dir=dir1)
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                create_table(table_name='receipt_ingredient', dir=dir2)
                 mycursor.execute(sql)
                 purchases = mycursor.fetchall()
 
@@ -488,49 +497,147 @@ def get_purchase():
 
         mycursor = mysql.cursor2
         sql = "SELECT GROUP_CONCAT(fi.food_name), GROUP_CONCAT(fi.price), GROUP_CONCAT(fi.weight), ri.receipt_id, GROUP_CONCAT(ri.weight), ri.date, r.id, r.total_amount FROM food_item fi, receipt_ingredient ri, receipt r WHERE fi.fid = ri.fid AND r.receipt_id = ri.receipt_id AND r.id = '{}' AND r.receipt_id = '{}' GROUP BY ri.receipt_id".format(current_user.id, receipt_id)
+        try:
+            #mySQL
 
-        mycursor.execute(sql)
-        purchases = mycursor.fetchall()
+            mycursor.execute(sql)
+            purchases = mycursor.fetchall()
 
-        details = {"food_items": [],
-                   "food_quantity": [], "original_weight": []}
+            details = {"food_items": [],
+                    "food_quantity": [], "original_weight": []}
 
-        food_list = []
-        price_list = []
-        original_weight_list = []
-        final_weight_list = []
+            food_list = []
+            price_list = []
+            original_weight_list = []
+            final_weight_list = []
 
-        for purchase in purchases:
-            food_list = purchase[0].split(",")
-            price_list = purchase[1].split(",")
-            original_weight_list = purchase[2].split(",")
-            final_weight_list = purchase[4].split(",")
+            for purchase in purchases:
+                food_list = purchase[0].split(",")
+                price_list = purchase[1].split(",")
+                original_weight_list = purchase[2].split(",")
+                final_weight_list = purchase[4].split(",")
 
-        price_list = list(map(float, price_list))
+            price_list = list(map(float, price_list))
 
-        original_weight_list = list(map(float, original_weight_list))
-        final_weight_list = list(map(float, final_weight_list))
+            original_weight_list = list(map(float, original_weight_list))
+            final_weight_list = list(map(float, final_weight_list))
 
-        quantity_list = []
-        quantity = 0
+            quantity_list = []
+            quantity = 0
 
-        for i in range(len(original_weight_list)):
-            quantity = final_weight_list[i] / original_weight_list[i]
-            quantity_list.append(int(quantity))
+            for i in range(len(original_weight_list)):
+                quantity = final_weight_list[i] / original_weight_list[i]
+                quantity_list.append(int(quantity))
 
-        # total_amt = 0
-        # for i in range(len(price_list)):
-        #     total_amt += price_list[i] * quantity_list[i]
+            # total_amt = 0
+            # for i in range(len(price_list)):
+            #     total_amt += price_list[i] * quantity_list[i]
 
-        # total_amt = "{:.2f}".format(total_amt)
+            # total_amt = "{:.2f}".format(total_amt)
 
-        details["food_items"] = food_list
-        details["food_quantity"] = quantity_list
-        details["original_weight"] = original_weight_list
+            details["food_items"] = food_list
+            details["food_quantity"] = quantity_list
+            details["original_weight"] = original_weight_list
 
-        print(details)
+            print(details)
 
-        return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
+            return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
+
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+                dir3 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt.sql')
+                create_table(table_name='receipt_ingredient', dir=dir1)
+                create_table(table_name='food_item', dir=dir2)
+                create_table(table_name='receipt', dir=dir3)
+
+                mycursor.execute(sql)
+                purchases = mycursor.fetchall()
+
+                details = {"food_items": [],
+                        "food_quantity": [], "original_weight": []}
+
+                food_list = []
+                price_list = []
+                original_weight_list = []
+                final_weight_list = []
+
+                for purchase in purchases:
+                    food_list = purchase[0].split(",")
+                    price_list = purchase[1].split(",")
+                    original_weight_list = purchase[2].split(",")
+                    final_weight_list = purchase[4].split(",")
+
+                price_list = list(map(float, price_list))
+
+                original_weight_list = list(map(float, original_weight_list))
+                final_weight_list = list(map(float, final_weight_list))
+
+                quantity_list = []
+                quantity = 0
+
+                for i in range(len(original_weight_list)):
+                    quantity = final_weight_list[i] / original_weight_list[i]
+                    quantity_list.append(int(quantity))
+
+                # total_amt = 0
+                # for i in range(len(price_list)):
+                #     total_amt += price_list[i] * quantity_list[i]
+
+                # total_amt = "{:.2f}".format(total_amt)
+
+                details["food_items"] = food_list
+                details["food_quantity"] = quantity_list
+                details["original_weight"] = original_weight_list
+
+                print(details)
+
+                return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
+
+        # mycursor.execute(sql)
+        # purchases = mycursor.fetchall()
+
+        # details = {"food_items": [],
+        #            "food_quantity": [], "original_weight": []}
+
+        # food_list = []
+        # price_list = []
+        # original_weight_list = []
+        # final_weight_list = []
+
+        # for purchase in purchases:
+        #     food_list = purchase[0].split(",")
+        #     price_list = purchase[1].split(",")
+        #     original_weight_list = purchase[2].split(",")
+        #     final_weight_list = purchase[4].split(",")
+
+        # price_list = list(map(float, price_list))
+
+        # original_weight_list = list(map(float, original_weight_list))
+        # final_weight_list = list(map(float, final_weight_list))
+
+        # quantity_list = []
+        # quantity = 0
+
+        # for i in range(len(original_weight_list)):
+        #     quantity = final_weight_list[i] / original_weight_list[i]
+        #     quantity_list.append(int(quantity))
+
+        # # total_amt = 0
+        # # for i in range(len(price_list)):
+        # #     total_amt += price_list[i] * quantity_list[i]
+
+        # # total_amt = "{:.2f}".format(total_amt)
+
+        # details["food_items"] = food_list
+        # details["food_quantity"] = quantity_list
+        # details["original_weight"] = original_weight_list
+
+        # print(details)
+
+        # return render_template('home/purchase_detail.html', purchases=purchases, details=details, type="mysql")
     
     
 @nosqlbp.route('/get_purchase', methods=['POST'])
@@ -635,14 +742,36 @@ def insert_receipt():
                 total_amt
             )
         ]
+        try:
+            #mySQL
+            mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
 
-        mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
+            mycursor = mysql.cursor2
+            mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+            receipt_id = mycursor.fetchone()
 
-        mycursor = mysql.cursor2
-        mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
-        receipt_id = mycursor.fetchone()
+            return jsonify({'receipt_id': receipt_id[0]})
 
-        return jsonify({'receipt_id': receipt_id[0]})
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt.sql')
+                create_table(table_name='receipt', dir=dir)
+                mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
+
+                mycursor = mysql.cursor2
+                mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+                receipt_id = mycursor.fetchone()
+
+                return jsonify({'receipt_id': receipt_id[0]})
+        
+        # mysql.insert_data(table_name="receipt", table_columns=["id, total_amount"], values=receipt)
+
+        # mycursor = mysql.cursor2
+        # mycursor.execute("SELECT receipt_id FROM receipt ORDER BY receipt_id DESC LIMIT 1")
+        # receipt_id = mycursor.fetchone()
+
+        # return jsonify({'receipt_id': receipt_id[0]})
 
 
 @nosqlbp.route('/insert_receipt', methods=['POST'])
@@ -694,10 +823,25 @@ def insert_receipt_ingredient():
                 date
             )
         ]
+        try:
+            #mySQL
         
-        mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+            mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
 
-        return jsonify({'response': "OK"})
+            return jsonify({'response': "OK"})
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                create_table(table_name='receipt_ingredient', dir=dir)
+                mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+
+                return jsonify({'response': "OK"})
+                    
+        # mysql.insert_data(table_name="receipt_ingredient", table_columns=["receipt_id", "fid", "weight", "date"], values=receipt_ingredient)
+
+        # return jsonify({'response': "OK"})
     
     
 @nosqlbp.route('/insert_receipt_ingredient', methods=["POST"])
@@ -724,9 +868,24 @@ def insert_receipt_ingredient():
 @mysqlbp.route('/recipes.html')
 @login_required
 def recipes():
-    recipes = queryingMySQL(method="SELECT", table_name='recipe')
 
-    return render_template('home/recipes.html', recipes=recipes)
+        try:
+            #mySQL
+        
+            recipes = queryingMySQL(method="SELECT", table_name='recipe')
+            return render_template('home/recipes.html', recipes=recipes)
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'recipe.sql')
+                create_table(table_name='recipe', dir=dir)
+                recipes = queryingMySQL(method="SELECT", table_name='recipe')
+                return render_template('home/recipes.html', recipes=recipes)
+            
+    # recipes = queryingMySQL(method="SELECT", table_name='recipe')
+
+    # return render_template('home/recipes.html', recipes=recipes)
 
 
 @nosqlbp.route('/recipes.html')
@@ -742,11 +901,29 @@ def recipes():
 def get_recipe():
     if request.method == 'POST':
         recipe_id = request.form['recipe_id']
-        
-        recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
-        marinates_list = recipes[0]["marinates"].split(", ")
 
-        return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
+        try:
+            #mySQL
+        
+            recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
+            marinates_list = recipes[0]["marinates"].split(", ")
+
+            return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table recipe')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'recipe.sql')
+                create_table(table_name='recipe', dir=dir)
+                recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
+                marinates_list = recipes[0]["marinates"].split(", ")
+
+                return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
+
+        # recipes = queryingMySQL(method="SELECT", table_name="recipe", filterBy=["rid"], filterVal=[recipe_id])
+        # marinates_list = recipes[0]["marinates"].split(", ")
+
+        # return render_template('home/recipe_detail.html', recipes=recipes[0], marinates_list=marinates_list, type="mysql")
 
 
 @nosqlbp.route('/get_recipe', methods=['POST'])
@@ -764,30 +941,90 @@ def get_recipe():
 def GetPantryItems():
     sql4 = "SELECT id FROM user WHERE username= '" + str(current_user) + "'"
     mycursor4 = db.cursor(buffered=True, dictionary=True)
-    mycursor4.execute(sql4)
-    id = mycursor4.fetchall()
     sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-
-    mycursor = db.cursor(buffered=True, dictionary=True)
-    mycursor.execute(sql)
-    db.commit()
-    pantry_items = mycursor.fetchall()
-    print("data", pantry_items)
     sql2 = "SELECT SUM(weight) FROM pantry WHERE id=(SELECT id FROM user WHERE username= '" + \
         str(current_user) + "')"
-    mycursor2 = db.cursor(buffered=True, dictionary=True)
-    mycursor2.execute(sql2)
-    pantryheaviest = mycursor2.fetchall()
     sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-    mycursor3 = db.cursor(buffered=True, dictionary=True)
-    mycursor3.execute(sql3)
-    fooditem = mycursor3.fetchall()
-    #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
-    #mycursor4 = db.cursor(buffered=True, dictionary=True)
-    # mycursor4.execute(sql4)
-    #maxfoodname= mycursor3.fetchall()
 
-    return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+    try:
+        #mySQL
+    
+
+
+        mycursor4.execute(sql4)
+        id = mycursor4.fetchall()
+
+        mycursor = db.cursor(buffered=True, dictionary=True)
+        mycursor.execute(sql)
+        db.commit()
+        pantry_items = mycursor.fetchall()
+        print("data", pantry_items)
+        mycursor2 = db.cursor(buffered=True, dictionary=True)
+        mycursor2.execute(sql2)
+        pantryheaviest = mycursor2.fetchall()
+        mycursor3 = db.cursor(buffered=True, dictionary=True)
+        mycursor3.execute(sql3)
+        fooditem = mycursor3.fetchall()
+        #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+        #mycursor4 = db.cursor(buffered=True, dictionary=True)
+        # mycursor4.execute(sql4)
+        #maxfoodname= mycursor3.fetchall()
+
+        return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+    
+    except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'pantry.sql')
+                create_table(table_name='food_item', dir=dir1)
+                create_table(table_name='pantry', dir=dir2)
+                mycursor4.execute(sql4)
+                id = mycursor4.fetchall()
+
+                mycursor = db.cursor(buffered=True, dictionary=True)
+                mycursor.execute(sql)
+                db.commit()
+                pantry_items = mycursor.fetchall()
+                print("data", pantry_items)
+                mycursor2 = db.cursor(buffered=True, dictionary=True)
+                mycursor2.execute(sql2)
+                pantryheaviest = mycursor2.fetchall()
+                mycursor3 = db.cursor(buffered=True, dictionary=True)
+                mycursor3.execute(sql3)
+                fooditem = mycursor3.fetchall()
+                #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+                #mycursor4 = db.cursor(buffered=True, dictionary=True)
+                # mycursor4.execute(sql4)
+                #maxfoodname= mycursor3.fetchall()
+
+                return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+
+
+    # mycursor4.execute(sql4)
+    # id = mycursor4.fetchall()
+    # sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(current_user) + "')"
+
+    # mycursor = db.cursor(buffered=True, dictionary=True)
+    # mycursor.execute(sql)
+    # db.commit()
+    # pantry_items = mycursor.fetchall()
+    # print("data", pantry_items)
+    # sql2 = "SELECT SUM(weight) FROM pantry WHERE id=(SELECT id FROM user WHERE username= '" + \
+    #     str(current_user) + "')"
+    # mycursor2 = db.cursor(buffered=True, dictionary=True)
+    # mycursor2.execute(sql2)
+    # pantryheaviest = mycursor2.fetchall()
+    # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
+    # mycursor3 = db.cursor(buffered=True, dictionary=True)
+    # mycursor3.execute(sql3)
+    # fooditem = mycursor3.fetchall()
+    # #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+    # #mycursor4 = db.cursor(buffered=True, dictionary=True)
+    # # mycursor4.execute(sql4)
+    # #maxfoodname= mycursor3.fetchall()
+
+    # return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
 
 
 @mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
@@ -799,21 +1036,65 @@ def update3():
             "' WHERE id = (SELECT id FROM user WHERE username= '" + \
             str(current_user) + "') AND fid =" + str(fid)
         mycursor = db.cursor()
-        mycursor.execute(sql)
-        db.commit()
-        data = mycursor.fetchall()
         sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
 
-        mycursor2 = db.cursor(buffered=True, dictionary=True)
-        mycursor2.execute(sql2)
-        db.commit()
-        pantry_items = mycursor2.fetchall()
         sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        mycursor3 = db.cursor(buffered=True, dictionary=True)
-        mycursor3.execute(sql3)
-        db.commit()
-        fooditem = mycursor3.fetchall()
-        return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
+
+
+        try:
+            #mySQL
+        
+            mycursor.execute(sql)
+            db.commit()
+            data = mycursor.fetchall()
+
+            mycursor2 = db.cursor(buffered=True, dictionary=True)
+            mycursor2.execute(sql2)
+            db.commit()
+            pantry_items = mycursor2.fetchall()
+            mycursor3 = db.cursor(buffered=True, dictionary=True)
+            mycursor3.execute(sql3)
+            db.commit()
+            fooditem = mycursor3.fetchall()
+            return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient and food_item')
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'receipt_ingredient.sql')
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+                create_table(table_name='receipt_ingredient', dir=dir1)
+                create_table(table_name='food_item', dir=dir2)
+                mycursor.execute(sql)
+                db.commit()
+                data = mycursor.fetchall()
+
+                mycursor2 = db.cursor(buffered=True, dictionary=True)
+                mycursor2.execute(sql2)
+                db.commit()
+                pantry_items = mycursor2.fetchall()
+                mycursor3 = db.cursor(buffered=True, dictionary=True)
+                mycursor3.execute(sql3)
+                db.commit()
+                fooditem = mycursor3.fetchall()
+                return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
+
+
+        # mycursor.execute(sql)
+        # db.commit()
+        # data = mycursor.fetchall()
+        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
+
+        # mycursor2 = db.cursor(buffered=True, dictionary=True)
+        # mycursor2.execute(sql2)
+        # db.commit()
+        # pantry_items = mycursor2.fetchall()
+        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
+        # mycursor3 = db.cursor(buffered=True, dictionary=True)
+        # mycursor3.execute(sql3)
+        # db.commit()
+        # fooditem = mycursor3.fetchall()
+        # return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
 
 
 @nosqlbp.route('/updatepantry', methods=['GET', 'POST'])
@@ -862,19 +1143,62 @@ def Create():
         sql = "INSERT INTO pantry (id, fid, weight) VALUES ((SELECT id FROM user WHERE username= '" + \
             str(current_user) + "'), '" + fid + "', '" + weight + "')"
         mycursor = db.cursor()
-        mycursor.execute(sql)
-        db.commit()
         sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-
-        mycursor2 = db.cursor(buffered=True, dictionary=True)
-        mycursor2.execute(sql2)
-        db.commit()
-        pantry_items = mycursor2.fetchall()
         sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        mycursor3 = db.cursor(buffered=True, dictionary=True)
-        mycursor3.execute(sql3)
-        fooditem = mycursor3.fetchall()
-        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+        try:
+            #mySQL
+        
+
+            mycursor.execute(sql)
+            db.commit()
+
+            mycursor2 = db.cursor(buffered=True, dictionary=True)
+            mycursor2.execute(sql2)
+            db.commit()
+            pantry_items = mycursor2.fetchall()
+            mycursor3 = db.cursor(buffered=True, dictionary=True)
+            mycursor3.execute(sql3)
+            fooditem = mycursor3.fetchall()
+            return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table food_item and pantry')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+                dir = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'pantry.sql')
+                create_table(table_name='food_item', dir=dir)
+                create_table(table_name='pantry', dir=dir)
+
+                mycursor.execute(sql)
+                db.commit()
+
+                mycursor2 = db.cursor(buffered=True, dictionary=True)
+                mycursor2.execute(sql2)
+                db.commit()
+                pantry_items = mycursor2.fetchall()
+                mycursor3 = db.cursor(buffered=True, dictionary=True)
+                mycursor3.execute(sql3)
+                fooditem = mycursor3.fetchall()
+                return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+
+        # mycursor.execute(sql)
+        # db.commit()
+        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
+
+        # mycursor2 = db.cursor(buffered=True, dictionary=True)
+        # mycursor2.execute(sql2)
+        # db.commit()
+        # pantry_items = mycursor2.fetchall()
+        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
+        # mycursor3 = db.cursor(buffered=True, dictionary=True)
+        # mycursor3.execute(sql3)
+        # fooditem = mycursor3.fetchall()
+        # return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
 
 @nosqlbp.route('/Createpantry', methods=['GET', 'POST'])
@@ -942,19 +1266,56 @@ def delete():
         fid = str(request.form['fidssr'])
         sql = "DELETE FROM pantry WHERE id = (SELECT id FROM user WHERE username= '" + str(
             current_user) + "') AND fid = '" + fid + "'"
-        mycursor = db.cursor()
-        mycursor.execute(sql)
-        db.commit()
-        mycursor2 = db.cursor(buffered=True, dictionary=True)
         sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-        mycursor2.execute(sql2)
-        db.commit()
-        pantry_items = mycursor2.fetchall()
         sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        mycursor3 = db.cursor(buffered=True, dictionary=True)
-        mycursor3.execute(sql3)
-        fooditem = mycursor3.fetchall()
-        return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+        mycursor = db.cursor()
+
+        try:
+            #mySQL
+        
+            mycursor.execute(sql)
+            db.commit()
+            mycursor2 = db.cursor(buffered=True, dictionary=True)
+            mycursor2.execute(sql2)
+            db.commit()
+            pantry_items = mycursor2.fetchall()
+            mycursor3 = db.cursor(buffered=True, dictionary=True)
+            mycursor3.execute(sql3)
+            fooditem = mycursor3.fetchall()
+            return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+        
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table receipt_ingredient')
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'pantry.sql')
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+                create_table(table_name='pantry', dir=dir1)
+                create_table(table_name='food_item', dir=dir2)
+                mycursor.execute(sql)
+                db.commit()
+                mycursor2 = db.cursor(buffered=True, dictionary=True)
+                mycursor2.execute(sql2)
+                db.commit()
+                pantry_items = mycursor2.fetchall()
+                mycursor3 = db.cursor(buffered=True, dictionary=True)
+                mycursor3.execute(sql3)
+                fooditem = mycursor3.fetchall()
+                return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+
+
+
+        # mycursor.execute(sql)
+        # db.commit()
+        # mycursor2 = db.cursor(buffered=True, dictionary=True)
+        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
+        # mycursor2.execute(sql2)
+        # db.commit()
+        # pantry_items = mycursor2.fetchall()
+        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
+        # mycursor3 = db.cursor(buffered=True, dictionary=True)
+        # mycursor3.execute(sql3)
+        # fooditem = mycursor3.fetchall()
+        # return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
 
 @nosqlbp.route('/Removepantry', methods=['GET', 'POST'])
@@ -988,10 +1349,33 @@ def meal_history():
     print("userid", userid)
     sql = "SELECT r.rid, m.date, r.recipe_name, r.dietary_type FROM mealhistory m, recipe r WHERE m.rid = r.rid AND m.id = " + str(userid[0]["id"])
     mycursor = db.cursor(buffered=True, dictionary=True)
-    mycursor.execute(sql)
-    data = mycursor.fetchall()
-    print("data", data)
-    return render_template('home/meal_history.html', data=data)
+
+    try:
+        #mySQL
+    
+        mycursor.execute(sql)
+        data = mycursor.fetchall()
+        print("data", data)
+        return render_template('home/meal_history.html', data=data)
+    
+    except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table mealhistory')
+                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'mealhistory.sql')
+                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'recipe.sql')
+                create_table(table_name='mealhistory', dir=dir1)
+                create_table(table_name='recipe', dir=dir2)
+                mycursor.execute(sql)
+                data = mycursor.fetchall()
+                print("data", data)
+                return render_template('home/meal_history.html', data=data)
+
+
+
+    # mycursor.execute(sql)
+    # data = mycursor.fetchall()
+    # print("data", data)
+    # return render_template('home/meal_history.html', data=data)
 
 @nosqlbp.route('/meal_history.html')
 @login_required

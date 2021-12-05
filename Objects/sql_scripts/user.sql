@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS user(
-uid INT AUTO_INCREMENT UNIQUE, 
+id INT AUTO_INCREMENT UNIQUE, 
 username VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   gender CHAR(1) NOT NULL,
@@ -8,5 +8,5 @@ username VARCHAR(255) NOT NULL,
   profile_bio VARCHAR(255),
   dietary_needs VARCHAR(255),
   age INT NOT NULL,
-  PRIMARY KEY (uid)
+  PRIMARY KEY (id)
   );

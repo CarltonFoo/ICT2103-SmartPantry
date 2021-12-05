@@ -1,11 +1,18 @@
 CREATE TABLE IF NOT EXISTS MealHistory ( 
  rid INT NOT NULL,
- uid INT NOT NULL,
+ id INT NOT NULL,
  date DATETIME NOT NULL,
- type VARCHAR(255) NOT NULL,
  FOREIGN KEY(rid) REFERENCES recipe(rid),
- FOREIGN KEY(uid) REFERENCES user(uid),
- FOREIGN KEY(type) REFERENCES recipe(type),
- PRIMARY KEY(rid,uid)
+ FOREIGN KEY(id) REFERENCES user(id),
+ PRIMARY KEY(rid,id)
  );
  
+ -- Meal History
+INSERT INTO `receipt_ingredient` VALUES 
+(3,1,'2021-12-01'),
+(1,1,'2021-11-02'),
+(2,2,'2021-11-03'),
+(5,2,'2021-11-03'),
+(7,3,'2021-11-03'),
+(6,3,'2021-11-03'),
+(4,4,'2021-11-04');
