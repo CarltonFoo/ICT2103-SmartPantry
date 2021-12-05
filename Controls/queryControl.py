@@ -19,8 +19,6 @@ def queryingMySQL(data=None, table_name: str = None, method: str = "SELECT", get
 
     if method == "INSERT":
         # mySQL
-        # sql_result = insert_data(table_name=table_name, table_columns=data.keys(), values=data.values())
-        # return sql_result
 
         try:
             #mySQL
@@ -35,9 +33,6 @@ def queryingMySQL(data=None, table_name: str = None, method: str = "SELECT", get
                 return sql_result
 
     elif method == "DELETE":
-        # mySQL
-        # sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
-        # return sql_result
         try:
             #mySQL
             sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
@@ -52,9 +47,6 @@ def queryingMySQL(data=None, table_name: str = None, method: str = "SELECT", get
 
 
     elif method == "UPDATE":
-        # mySQL
-        # sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
-        # return sql_result
         try:
             #mySQL
             sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
