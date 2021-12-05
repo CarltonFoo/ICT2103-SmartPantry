@@ -12,25 +12,61 @@ def queryingMySQL(data=None, table_name: str = None, method: str = "SELECT", get
         except Error as err:
             if err.errno == errorcode.ER_NO_SUCH_TABLE:
                 print(f'Create table {table_name}')
-                dir = os.path.join(os.path.dirname(__file__), "./sql_scripts/", f'{table_name}.sql')
+                dir = os.path.join(os.path.dirname(__file__), "../Objects/sql_scripts/", f'{table_name}.sql')
                 create_table(table_name=table_name, dir=dir)
                 sql_result = select_data(table_name=table_name, getheaders=getheaders, filterBy=filterBy, filterVal=filterVal)
                 return sql_result
 
     if method == "INSERT":
         # mySQL
-        sql_result = insert_data(table_name=table_name, table_columns=data.keys(), values=data.values())
-        return sql_result
-        
+        # sql_result = insert_data(table_name=table_name, table_columns=data.keys(), values=data.values())
+        # return sql_result
+
+        try:
+            #mySQL
+            sql_result = insert_data(table_name=table_name, table_columns=data.keys(), values=data.values())
+            return sql_result
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table {table_name}')
+                dir = os.path.join(os.path.dirname(__file__), "../Objects/sql_scripts/", f'{table_name}.sql')
+                create_table(table_name=table_name, dir=dir)
+                sql_result = insert_data(table_name=table_name, table_columns=data.keys(), values=data.values())
+                return sql_result
+
     elif method == "DELETE":
         # mySQL
-        sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
-        return sql_result
+        # sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
+        # return sql_result
+        try:
+            #mySQL
+            sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
+            return sql_result
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table {table_name}')
+                dir = os.path.join(os.path.dirname(__file__), "./sql_scripts/", f'{table_name}.sql')
+                create_table(table_name=table_name, dir=dir)
+                sql_result = delete_data(table_name=table_name, identifier_value=identifier_value, identifier=identifier)
+                return sql_result
+
 
     elif method == "UPDATE":
         # mySQL
-        sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
-        return sql_result
+        # sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
+        # return sql_result
+        try:
+            #mySQL
+            sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
+            return sql_result
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table {table_name}')
+                dir = os.path.join(os.path.dirname(__file__), "./sql_scripts/", f'{table_name}.sql')
+                create_table(table_name=table_name, dir=dir)
+                sql_result = update_data(table_name=table_name, data=data, identifier_value=identifier_value, identifier=identifier)
+                return sql_result
+
 
 
 def queryingNoSQL(data=None, method: str = "SELECT", filterBy: list = None, filterVal: list = None, type: str = None, collection: str = None, field=None):
