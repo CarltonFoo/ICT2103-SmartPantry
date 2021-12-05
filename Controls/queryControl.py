@@ -1,12 +1,21 @@
 from Objects.sql_commands import *
 from Objects.nosql_commands import *
+from mysql.connector import errorcode, Error
 
 def queryingMySQL(data=None, table_name: str = None, method: str = "SELECT", getheaders: list = None, filterBy: list = None, filterVal: list = None, identifier: str = None, identifier_value: str = None):
 
     if method == "SELECT":
-        #mySQL
-        sql_result = select_data(table_name=table_name, getheaders=getheaders, filterBy= filterBy, filterVal=filterVal)
-        return sql_result
+        try:
+            #mySQL
+            sql_result = select_data(table_name=table_name, getheaders=getheaders, filterBy=filterBy, filterVal=filterVal)
+            return sql_result
+        except Error as err:
+            if err.errno == errorcode.ER_NO_SUCH_TABLE:
+                print(f'Create table {table_name}')
+                dir = os.path.join(os.path.dirname(__file__), "./sql_scripts/", f'{table_name}.sql')
+                create_table(table_name=table_name, dir=dir)
+                sql_result = select_data(table_name=table_name, getheaders=getheaders, filterBy=filterBy, filterVal=filterVal)
+                return sql_result
 
     if method == "INSERT":
         # mySQL
