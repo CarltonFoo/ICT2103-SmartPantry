@@ -1101,7 +1101,6 @@ def noSQL_update_pantry():
 @mysqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def Create():
     if request.method == "POST":
-        id = "1"
         weight = str(request.form['createweight'])
         fid = str(request.form['colours'])
 
