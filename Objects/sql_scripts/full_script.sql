@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS recipe_ingredient(
   PRIMARY KEY(rid, fid)
 );
 
-CREATE TABLE IF NOT EXISTS MealHistory (
+CREATE TABLE IF NOT EXISTS mealhistory (
   rid INT NOT NULL,
   id INT NOT NULL,
   date DATETIME NOT NULL,

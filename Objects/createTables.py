@@ -15,12 +15,3 @@ def setUpDB(db,filePath):
     db.commit()
     print("successfully created")
     return
-
-# mydb = mysql.connector.connect(
-# # Database connection
-#     host="localhost",
-#     user="root",
-#     password=""
-# )
-# filePath = './sql_scripts/full_script.sql'
-# setUpDB(mydb,filePath)

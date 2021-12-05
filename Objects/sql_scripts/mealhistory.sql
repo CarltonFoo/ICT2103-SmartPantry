@@ -1,13 +1,13 @@
-CREATE TABLE IF NOT EXISTS MealHistory ( 
- rid INT NOT NULL,
- id INT NOT NULL,
- date DATETIME NOT NULL,
- FOREIGN KEY(rid) REFERENCES recipe(rid),
- FOREIGN KEY(id) REFERENCES user(id),
- PRIMARY KEY(rid,id)
- );
- 
- -- Meal History
+CREATE TABLE IF NOT EXISTS mealhistory (
+  rid INT NOT NULL,
+  id INT NOT NULL,
+  date DATETIME NOT NULL,
+  FOREIGN KEY(rid) REFERENCES recipe(rid),
+  FOREIGN KEY(id) REFERENCES user(id),
+  PRIMARY KEY(rid, id)
+);
+
+
 INSERT INTO `receipt_ingredient` VALUES 
 (3,1,'2021-12-01'),
 (1,1,'2021-11-02'),
