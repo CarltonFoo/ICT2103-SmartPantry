@@ -4,6 +4,7 @@ from datetime import datetime
 from itertools import groupby
 from operator import itemgetter
 from dns.rdatatype import NULL
+from werkzeug.utils import redirect
 from apps.home import mysqlbp, nosqlbp
 from apps.authentication.util import hash_pass
 from apps.authentication.models import Users
@@ -930,9 +931,6 @@ def GetPantryItems():
 
     try:
         #mySQL
-    
-
-
         mycursor4.execute(sql4)
         id = mycursor4.fetchall()
 
@@ -955,58 +953,65 @@ def GetPantryItems():
         return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
     
     except Error as err:
-            if err.errno == errorcode.ER_NO_SUCH_TABLE:
-                print(f'Create table receipt_ingredient')
-                dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
-                dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'pantry.sql')
-                create_table(table_name='food_item', dir=dir1)
-                create_table(table_name='pantry', dir=dir2)
-                mycursor4.execute(sql4)
-                id = mycursor4.fetchall()
+        if err.errno == errorcode.ER_NO_SUCH_TABLE:
+            print(f'Create table receipt_ingredient')
+            dir1 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'food_item.sql')
+            dir2 = os.path.join(os.path.dirname(__file__), "../../Objects/sql_scripts/", f'pantry.sql')
+            create_table(table_name='food_item', dir=dir1)
+            create_table(table_name='pantry', dir=dir2)
+            mycursor4.execute(sql4)
+            id = mycursor4.fetchall()
 
-                mycursor = db.cursor(buffered=True, dictionary=True)
-                mycursor.execute(sql)
-                db.commit()
-                pantry_items = mycursor.fetchall()
-                print("data", pantry_items)
-                mycursor2 = db.cursor(buffered=True, dictionary=True)
-                mycursor2.execute(sql2)
-                pantryheaviest = mycursor2.fetchall()
-                mycursor3 = db.cursor(buffered=True, dictionary=True)
-                mycursor3.execute(sql3)
-                fooditem = mycursor3.fetchall()
-                #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
-                #mycursor4 = db.cursor(buffered=True, dictionary=True)
-                # mycursor4.execute(sql4)
-                #maxfoodname= mycursor3.fetchall()
+            mycursor = db.cursor(buffered=True, dictionary=True)
+            mycursor.execute(sql)
+            db.commit()
+            pantry_items = mycursor.fetchall()
+            print("data", pantry_items)
+            mycursor2 = db.cursor(buffered=True, dictionary=True)
+            mycursor2.execute(sql2)
+            pantryheaviest = mycursor2.fetchall()
+            mycursor3 = db.cursor(buffered=True, dictionary=True)
+            mycursor3.execute(sql3)
+            fooditem = mycursor3.fetchall()
+            #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
+            #mycursor4 = db.cursor(buffered=True, dictionary=True)
+            # mycursor4.execute(sql4)
+            #maxfoodname= mycursor3.fetchall()
 
-                return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+            return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
 
 
-    # mycursor4.execute(sql4)
-    # id = mycursor4.fetchall()
-    # sql = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id= (SELECT id FROM user WHERE username= '" + str(current_user) + "')"
+@nosqlbp.route('/inventory.html')
+def noSQL_get_pantry():
+    current_username = current_user.username
+    user_pantry_collection = nosql.db["user_pantry"]
+    food_item_collection = nosql.db["food_item"]
+    
+    user_pantry_data = user_pantry_collection.find_one({'username': str(current_username)})
+    pantry_items = user_pantry_data["pantry_items"]
+    
+    fid_list = []
+    pantry_items_list = []
+    pantry_weight_list = []
+    for item in pantry_items:
+        fid_list.append(item["fid"])
+        pantry_items_list.append({"fid": item["fid"], "food_name": item["food_name"], "weight": item["weight"]})
+        pantry_weight_list.append(item["weight"])
+        
+    total_weight = sum(pantry_weight_list)
+                
+    food_items = food_item_collection.find(
+        {},
+        {"fid": 1, "food_name": 1 , "weight": 1}
+    )
+    
+    food_item_list = []
+    
+    for item in food_items:
+        if (item["fid"] not in fid_list):
+            food_item_list.append({"fid": item["fid"], "food_name": item["food_name"], "weight": item["weight"]})
 
-    # mycursor = db.cursor(buffered=True, dictionary=True)
-    # mycursor.execute(sql)
-    # db.commit()
-    # pantry_items = mycursor.fetchall()
-    # print("data", pantry_items)
-    # sql2 = "SELECT SUM(weight) FROM pantry WHERE id=(SELECT id FROM user WHERE username= '" + \
-    #     str(current_user) + "')"
-    # mycursor2 = db.cursor(buffered=True, dictionary=True)
-    # mycursor2.execute(sql2)
-    # pantryheaviest = mycursor2.fetchall()
-    # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-    # mycursor3 = db.cursor(buffered=True, dictionary=True)
-    # mycursor3.execute(sql3)
-    # fooditem = mycursor3.fetchall()
-    # #sql4="SELECT * FROM food_item e1 WHERE (SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=1)"
-    # #mycursor4 = db.cursor(buffered=True, dictionary=True)
-    # # mycursor4.execute(sql4)
-    # #maxfoodname= mycursor3.fetchall()
-
-    # return render_template('home/inventory.html', pantry_items=pantry_items, pantryheaviest=pantryheaviest, fooditem=fooditem)
+    return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=food_item_list, pantryheaviest=total_weight)
 
 
 @mysqlbp.route('/updatepantry', methods=['GET', 'POST'])
@@ -1021,7 +1026,6 @@ def update3():
         sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
 
         sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-
 
         try:
             #mySQL
@@ -1062,43 +1066,28 @@ def update3():
                 return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
 
 
-        # mycursor.execute(sql)
-        # db.commit()
-        # data = mycursor.fetchall()
-        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-
-        # mycursor2 = db.cursor(buffered=True, dictionary=True)
-        # mycursor2.execute(sql2)
-        # db.commit()
-        # pantry_items = mycursor2.fetchall()
-        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        # mycursor3 = db.cursor(buffered=True, dictionary=True)
-        # mycursor3.execute(sql3)
-        # db.commit()
-        # fooditem = mycursor3.fetchall()
-        # return render_template("home/inventory.html", data=data, pantry_items=pantry_items, fooditem=fooditem)
-
-
 @nosqlbp.route('/updatepantry', methods=['GET', 'POST'])
 def noSQL_update_pantry():
     try:
         if request.method == 'POST':
-            weight = str(request.form['weight'])
+            weight = float(request.form['weight'])
             fid = str(request.form['fidsss'])
-            user_collection = nosql.db.user
-            user_collection.update(
-                {"username": str(current_user), "pantry.fid": int(fid)},
+            user_pantry_collection = nosql.db["user_pantry"]
+            
+            user_pantry_collection.update(
+                {"username": str(current_user.username), "pantry_items.fid": int(fid)},
                 {
                     "$set": {
-                        "pantry.$.weight": weight
+                        "pantry_items.$.weight": weight
                     }
                 }
             )
-        return Response(
-            response=json.dumps({"message": "user updated"}),
-            status=200,
-            mimetype="application/json"
-        )
+        # return Response(
+        #     response=json.dumps({"message": "user updated"}),
+        #     status=200,
+        #     mimetype="application/json"
+        # )
+        return redirect("inventory.html")
     except Exception as ex:
         print(ex)
         Response(
@@ -1165,71 +1154,45 @@ def Create():
                 return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
 
-
-        # mycursor.execute(sql)
-        # db.commit()
-        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-
-        # mycursor2 = db.cursor(buffered=True, dictionary=True)
-        # mycursor2.execute(sql2)
-        # db.commit()
-        # pantry_items = mycursor2.fetchall()
-        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        # mycursor3 = db.cursor(buffered=True, dictionary=True)
-        # mycursor3.execute(sql3)
-        # fooditem = mycursor3.fetchall()
-        # return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
-
-
 @nosqlbp.route('/Createpantry', methods=['GET', 'POST'])
 def noSQL_Create():
     try:
         exists = False
         if request.method == "POST":
+            current_username = current_user.username
             weight = float(request.form['createweight'])
             fid = int(request.form['colours'])
+            
             food_collection = nosql.db.food_item
             # Check if food item already exists in pantry
-            user_collection = nosql.db.user
-            data = user_collection.find_one({'username': str(current_user)})
-            data["_id"] = str(data["_id"])
-            pantry_arr = data['pantry']
-            fid_list = []
-            for i in pantry_arr:
-                fid_list.append(i['fid'])
-                if i['fid'] == fid:
+            user_pantry_collection = nosql.db.user_pantry
+            user_pantry_data = user_pantry_collection.find_one({'username': str(current_username)})
+            
+            pantry_list = user_pantry_data["pantry_items"]
+            
+            for item in pantry_list:
+                if int(item["fid"]) == fid:
                     exists = True
+
             if exists:
-                user_collection.update(
-                    {"username": str(current_user), "pantry.fid": int(fid)},
+                user_pantry_collection.update(
+                    {"username": str(current_username), "pantry_items.fid": int(fid)},
                     {
                         "$inc": {
-                            "pantry.$.weight": weight
+                            "pantry_items.$.weight": weight
                         }
                     }
                 )
             else:
-                food = food_collection.find_one({'fid': int(fid)})
-                food["weight"] = weight
-                inserted_item = {
-                    'fid': food["fid"],
-                    'food_name': food['food_name'],
-                    'weight': food['weight']
+                food_item = food_collection.find_one({'fid': int(fid)})
+                pantry_item = {
+                    'fid': fid,
+                    'food_name': food_item['food_name'],
+                    'weight': float(weight)
                 }
-
-                queryingNoSQL(method="UPDATE", collection="user", type="push", filterBy="username", filterVal=str(current_user), data=inserted_item, field="pantry")
-            user_collection = nosql.db.user
-            data = user_collection.find_one({'username': str(current_user)})
-            data["_id"] = str(data["_id"])
-            pantry_items = data["pantry"]
-            food_list = food_collection.find({}, {'fid': 1, '_id': 0})
-            food_list2 = []
-            for f in list(food_list):
-                food_list2.append(f['fid'])
-            fooditem = list(set(food_list2)-set(fid_list))
-
-            return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
-
+                queryingNoSQL(method="UPDATE", collection="user_pantry", type="push", filterBy="username", filterVal=str(current_username), data=pantry_item, field="pantry_items")
+            
+            return redirect("inventory.html")
     except Exception as ex:
         print(ex)
         Response(
@@ -1283,43 +1246,18 @@ def delete():
                 return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
 
 
-
-        # mycursor.execute(sql)
-        # db.commit()
-        # mycursor2 = db.cursor(buffered=True, dictionary=True)
-        # sql2 = "SELECT p.id, p.fid, p.weight, e.food_name FROM food_item e, pantry p WHERE e.fid = p.fid AND p.id=(SELECT id FROM user WHERE username= '" + str(current_user) + "')"
-        # mycursor2.execute(sql2)
-        # db.commit()
-        # pantry_items = mycursor2.fetchall()
-        # sql3 = "SELECT * FROM food_item e1 WHERE NOT EXISTS( SELECT * FROM pantry AS e2 WHERE e1.fid = e2.fid AND id=(SELECT id FROM user WHERE username= '" + str(current_user) + "'))"
-        # mycursor3 = db.cursor(buffered=True, dictionary=True)
-        # mycursor3.execute(sql3)
-        # fooditem = mycursor3.fetchall()
-        # return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
-
-
 @nosqlbp.route('/Removepantry', methods=['GET', 'POST'])
 def noSQL_delete():
     if request.method == "POST":
+        current_username = current_user.username
         fid = int(request.form['fidssr'])
-        food_collection = nosql.db.food_item
-        user_collection = nosql.db.user
-        user_collection.update({'username': str(current_user)}, {
-                               '$pull': {"pantry": {"fid": fid}}})
-        data = user_collection.find_one({'username': str(current_user)})
-        data["_id"] = str(data["_id"])
-        pantry_items = data["pantry"]
-        fid_list = []
-        for i in pantry_items:
-            fid_list.append(i['fid'])
-        food_list = food_collection.find({}, {'fid': 1, '_id': 0})
-        food_list2 = []
-        #fooditem = list(set(food_list)-set(fid_list))
-        for f in list(food_list):
-            food_list2.append(f['fid'])
-        fooditem = list(set(food_list2)-set(fid_list))
+        user_pantry_collection = nosql.db["user_pantry"]
+        
+        user_pantry_collection.update(
+            {'username': str(current_username)}, 
+            {'$pull': {"pantry_items": {"fid": fid}}})
 
-    return render_template("home/inventory.html", pantry_items=pantry_items, fooditem=fooditem)
+    return redirect("inventory.html")
 
 
 @mysqlbp.route('/meal_history.html')

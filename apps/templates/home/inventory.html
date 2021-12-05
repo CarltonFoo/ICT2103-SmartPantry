@@ -1,85 +1,78 @@
-{% extends "layouts/base.html" %}
-
-{% block title %} UI Tables {% endblock %}
+{% extends "layouts/base.html" %} {% block title %} Inventory {% endblock %}
 
 <!-- Specific CSS goes HERE -->
-{% block stylesheets %}{% endblock stylesheets %}
-
-{% block content %}
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
 
 <!-- [ Main Content ] start -->
 <section class="pcoded-main-container">
     <H2>Pantry</H2>
-    <h3>Total Weight:</h3>   
-    <label>{{pantryheaviest}}</label>
-
+    <h3>Total Weight: {{pantryheaviest}}g</h3>
     <div class="card">
-    <table class="table">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">FOOD ID</th>
-                <th scope="col">WEIGHT</th>
-                <th scope="col">FOOD NAME</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in pantry_items %}
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">FOOD ID</th>
+                    <th scope="col">WEIGHT</th>
+                    <th scope="col">FOOD NAME</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in pantry_items %}
                 <tr>
                     <td>{{entry.fid}}</td>
-                    <td>{{entry.weight}}</td>
-                    <td>{{entry.food_name}}</td>        
+                    <td>{{entry.weight}}g</td>
+                    <td>{{entry.food_name}}</td>
                 </tr>
-                
-            {% endfor %}
-        </tbody>
-    </table>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     <div class="card">
-    <h3>Update Pantry Items</h3>
-    <form role="form" method="post" action="updatepantry">
-        
-        <label for="fidinput">Food NAME</label>
-        <select name= "fidsss">
+        <h3>Update Pantry Items</h3>
+        <form role="form" method="post" action="updatepantry">
+
+            <label for="fidinput">Food NAME</label>
+            <select name="fidsss">
             {% for colour in pantry_items %}
             <option value="{{colour.fid}}" SELECTED>{{colour.food_name}}</option>
             {% endfor %}
         </select>
-    </br>
-        <label for="weightinput">Weight</label>
-		<input type="text" class="form-control" id="weightinput" name="weight" required>
-    </br>
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
+            </br>
+            <label for="weightinput">Weight</label>
+            <input type="number" class="form-control" id="weightinput" name="weight" required>
+            </br>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
     </div>
     <div class="card">
-    <h3>Add Pantry Items</h3>
-    <form role="form" method="post" action="Createpantry">
-        <label for="foodid">Food NAME</label>
-        <select name= "colours">
+        <h3>Add Pantry Items</h3>
+        <form role="form" method="post" action="Createpantry">
+            <label for="foodid">Food NAME</label>
+            <select name="colours">
         {% for colour in fooditem %}
         <option value="{{colour.fid}}" SELECTED>{{colour.food_name}}</option>
         {% endfor %}
         </select>
-    </br>
-        <label for="weightadd">Weight</label>
-        <input type="text" class="form-control" id="createweightinput" name="createweight" required>
-    </br>    
-        <button type="submit" class="btn btn-primary">Save</button>
-    </br>
-    </form>
+            </br>
+            <label for="weightadd">Weight</label>
+            <input type="number" class="form-control" id="createweightinput" name="createweight" required>
+            </br>
+            <button type="submit" class="btn btn-primary">Save</button>
+            </br>
+        </form>
     </div>
     <div class="card">
-        <h3>Remove Pantry Items</h3> 
-    <form role="form" method="post" action="Removepantry">
-        <label for="remove">Food NAME</label>
-        <select name= "fidssr">
+        <h3>Remove Pantry Items</h3>
+        <form role="form" method="post" action="Removepantry">
+            <label for="remove">Food NAME</label>
+            <select name="fidssr">
             {% for colour in pantry_items %}
             <option value="{{colour.fid}}" SELECTED>{{colour.food_name}}</option>
             {% endfor %}
         </select>
-    </BR>
-        <button type="submit" class="btn btn-primary">Save</button>
-    </form>
+            </BR>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
 
 
 
