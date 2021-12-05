@@ -414,12 +414,13 @@ def grocery_history():
                 date = k["date"]
                 receipt_id = k["receipt_id"]
                 total_amount = k["total_amount"]
+                user_id = k["user_id"]
     
-            processed_list.append({"food_items": ", ".join(food_list[:3]), "food_length": len(food_list), "date": date, "receipt_id": receipt_id, "total_amount": total_amount})
+            processed_list.append({"food_items": ", ".join(food_list[:3]), "food_length": len(food_list), "date": date, "receipt_id": receipt_id, "total_amount": total_amount, "user_id": user_id})
                 
         print(processed_list)
         
-        return render_template('home/history.html', purchases=processed_list, type="nosql")
+        return render_template('home/history.html', purchases=processed_list, type="nosql", uid=current_user.id)
 
 
 @mysqlbp.route('/get_purchase', methods=['POST'])

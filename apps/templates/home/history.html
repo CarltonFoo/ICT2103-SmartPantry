@@ -58,7 +58,7 @@
                                             <button type="button" class="btn btn-warning viewDetails" data-id="{{ purchases[i][3] }}">View Details</button>
                                         </td>
                                     </tr>
-                                    {% endfor %} {% else %} {% for purchase in purchases %}
+                                    {% endfor %} {% else %} {% for purchase in purchases %} {% if purchase["user_id"] == uid %}
                                     <tr>
                                         <td>{{ purchase["receipt_id"] }}</td>
                                         <td>{{ purchase["food_items"] }}{% if purchase["food_length"] > 3 %}, ...{% endif %}</td>
@@ -68,7 +68,7 @@
                                             <button type="button" class="btn btn-warning viewDetails" data-id="{{ purchase['receipt_id'] }}">View Details</button>
                                         </td>
                                     </tr>
-                                    {% endfor %} {% endif %}
+                                    {% endif %} {% endfor %} {% endif %}
                                 </tbody>
                             </table>
                         </div>
