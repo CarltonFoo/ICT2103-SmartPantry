@@ -998,16 +998,46 @@ def meal_history():
 
     userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
 
-    # data = db.getCollection('mealhistory').aggregate([
-    # {$match : {admin : 1}},
-    # {$lookup: {from: "posts",localField: "_id",foreignField: "owner_id",as: "posts"}},
-    # {$project : {
-    #         posts : { $filter : {input : "$posts"  , as : "post", cond : { $eq : ['$$post.via' , 'facebook'] } } },
-    #         admin : 1
-    #     }}
-    # ])
+    # sql = "SELECT r.rid, m.date, r.recipe_name, r.dietary_type FROM mealhistory m, recipe r WHERE m.rid = r.rid AND m.id = " + str(userid[0]["id"])
+    
+    mealhistory_collection = nosql.db["mealhistory"]
+    testdata = mealhistory_collection.aggregate([
+        # { "$match": {
+        #     "id": userid
+        # }},
+        { "$lookup": {
+            "from": "recipe",
+            # "pipeline": [
+            #     { "$match": { "$expr": { "$eq": [ "$id",  "$$id" ] } } },
+            #     { "$project": { "id": 0 } },
+            # ],
+            "localField": "id",
+            "foreignField": "id",
+            "as": "recipe"
+        }},
+        {
+            "$unwind": "$recipe"
+        }
+        # ,
+        # {
+        #     "$project": {
+        #         # "_id": 0, 
+        #         "mealhistory": {"date": "$date"}, 
+        #         "recipe": {"rid": "$rid", "recipe_name": "$recipe_name", "dietary_type": "$dietary_type"}
+        #     }
+        # }
+    ]);
 
-    data = [{'rid': 3, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Fish Masala', 'dietary_type': 'Indian Food'}, {
-        'rid': 5, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Steamed Pork In Prawn Paste', 'dietary_type': 'Chinese Food'}]
-    print(userid)
+    print(testdata)
+    
+    mealhistory_list = []
+        
+    for mealhistory in testdata:
+        mealhistory_list.append({"receipt_id": mealhistory["receipt"]["rid"], 
+                                "date": mealhistory["mealhistory"]["date"]})
+
+    print(mealhistory_list)
+    return render_template('home/meal_history.html', data=mealhistory_list)
+
+    data = [{'rid': 3, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Fish Masala', 'dietary_type': 'Indian Food'}, {'rid': 5, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Steamed Pork In Prawn Paste', 'dietary_type': 'Chinese Food'}]
     return render_template('home/meal_history.html', data=data)

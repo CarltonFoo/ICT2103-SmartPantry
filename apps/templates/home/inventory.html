@@ -36,7 +36,7 @@
     </div>
     <div class="card">
     <h3>Update Pantry Items</h3>
-    <form role="form" method="post" action="/updatepantry">
+    <form role="form" method="post" action="updatepantry">
         
         <label for="fidinput">Food NAME</label>
         <select name= "fidsss">
@@ -53,7 +53,7 @@
     </div>
     <div class="card">
     <h3>Add Pantry Items</h3>
-    <form role="form" method="post" action="/Createpantry">
+    <form role="form" method="post" action="Createpantry">
         <label for="foodid">Food NAME</label>
         <select name= "colours">
         {% for colour in fooditem %}
@@ -70,7 +70,7 @@
     </div>
     <div class="card">
         <h3>Remove Pantry Items</h3> 
-    <form role="form" method="post" action="/Removepantry">
+    <form role="form" method="post" action="Removepantry">
         <label for="remove">Food NAME</label>
         <select name= "fidssr">
             {% for colour in pantry_items %}
