@@ -993,6 +993,7 @@ def noSQL_get_pantry():
     fid_list = []
     pantry_items_list = []
     pantry_weight_list = []
+          
     for item in pantry_items:
         fid_list.append(item["fid"])
         pantry_items_list.append({"fid": item["fid"], "food_name": item["food_name"], "weight": item["weight"]})
@@ -1292,9 +1293,6 @@ def meal_history():
 @nosqlbp.route('/meal_history.html')
 @login_required
 def meal_history():
-    
-    userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
-
     mealhistory_collection = nosql.db["mealhistory"]
     mealhistory = mealhistory_collection.aggregate([
         {"$lookup": {
@@ -1320,9 +1318,8 @@ def meal_history():
     ])
 
     mealhistory_list = []
-
     for history in mealhistory:
-        if history["mealhistory"]["id"] == userid[0]["id"]:
+        if history["mealhistory"]["id"] == current_user.id:
             mealhistory_list.append({"rid": history["mealhistory"]["rid"],
                                     "date": history["mealhistory"]["date"],
                                     "recipe_name": history["recipe"]["recipe_name"],
