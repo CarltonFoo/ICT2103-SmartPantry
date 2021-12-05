@@ -995,49 +995,44 @@ def meal_history():
 @nosqlbp.route('/meal_history.html')
 @login_required
 def meal_history():
-
+    
     userid = queryingMySQL(method="SELECT", getheaders=["id"], table_name='user', filterBy=['username'], filterVal=[str(current_user)])
 
-    # sql = "SELECT r.rid, m.date, r.recipe_name, r.dietary_type FROM mealhistory m, recipe r WHERE m.rid = r.rid AND m.id = " + str(userid[0]["id"])
-    
     mealhistory_collection = nosql.db["mealhistory"]
-    testdata = mealhistory_collection.aggregate([
-        # { "$match": {
-        #     "id": userid
-        # }},
-        { "$lookup": {
+    mealhistory = mealhistory_collection.aggregate([
+        {"$lookup": {
             "from": "recipe",
-            # "pipeline": [
-            #     { "$match": { "$expr": { "$eq": [ "$id",  "$$id" ] } } },
-            #     { "$project": { "id": 0 } },
-            # ],
-            "localField": "id",
-            "foreignField": "id",
+            "localField": "rid",
+            "foreignField": "rid",
             "as": "recipe"
         }},
         {
             "$unwind": "$recipe"
+        },
+        {
+            "$lookup": {
+                "from": "mealhistory",
+                "localField": "rid",
+                "foreignField": "rid",
+                "as": "mealhistory"
+            }
+        },
+        {
+            "$unwind": "$mealhistory"
         }
-        # ,
-        # {
-        #     "$project": {
-        #         # "_id": 0, 
-        #         "mealhistory": {"date": "$date"}, 
-        #         "recipe": {"rid": "$rid", "recipe_name": "$recipe_name", "dietary_type": "$dietary_type"}
-        #     }
-        # }
-    ]);
+    ])
 
-    print(testdata)
-    
+    print(mealhistory)
+
     mealhistory_list = []
-        
-    for mealhistory in testdata:
-        mealhistory_list.append({"receipt_id": mealhistory["receipt"]["rid"], 
-                                "date": mealhistory["mealhistory"]["date"]})
+
+    for history in mealhistory:
+        if history["mealhistory"]["id"] == userid[0]["id"]:
+            mealhistory_list.append({"rid": history["mealhistory"]["rid"],
+                                    "date": history["mealhistory"]["date"],
+                                    "recipe_name": history["recipe"]["recipe_name"],
+                                    "dietary_type": history["recipe"]["dietary_type"]})
 
     print(mealhistory_list)
+    
     return render_template('home/meal_history.html', data=mealhistory_list)
-
-    data = [{'rid': 3, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Fish Masala', 'dietary_type': 'Indian Food'}, {'rid': 5, 'date': datetime(2021, 11, 30, 0, 0), 'recipe_name': 'Steamed Pork In Prawn Paste', 'dietary_type': 'Chinese Food'}]
-    return render_template('home/meal_history.html', data=data)
